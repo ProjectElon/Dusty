@@ -19,10 +19,12 @@ namespace dusty
 			mClearColor = color;
 		}
 
-		inline void SetPixel(const size_t &x, const size_t &y, const Color& color)
+		inline void SetPixel(const size_t &x, const size_t &y, const Color& color) const
 		{
 			mPixels[mScreen->w * y + x] = color.ToInt(mScreen);
 		}
+		
+		void DrawLine(float x0, float y0, float x1, float y2, const Color& color) const;
 
 		void Update() const;
 		

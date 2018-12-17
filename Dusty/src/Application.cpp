@@ -69,6 +69,14 @@ int main(int argc, char* argv[])
 		}
 
 		renderer.Clear();
+
+		float w = window.GetWidth();
+		float h = window.GetHeight() - 3;
+
+		renderer.DrawLine(w / 2, 0, 0, h, Colors::Red);
+		renderer.DrawLine(w / 2, 0, w, h, Colors::Green);
+		renderer.DrawLine(0, h, w, h, Colors::Blue);
+
 		renderer.Update();
 	}
 

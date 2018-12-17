@@ -19,7 +19,7 @@ namespace dusty
 			, a(0.0f)
 		{}
 
-		explicit Color(const float &inR, const float &inG, const float &inB, const float &inA)
+		Color(const float &inR, const float &inG, const float &inB, const float &inA)
 			: r(inR)
 			, g(inG)
 			, b(inB)
@@ -36,4 +36,13 @@ namespace dusty
 		}
 
 	};
+}
+
+namespace Colors
+{
+	static const dusty::Color White (1.0f, 1.0f, 1.0f, 1.0f);
+	static const dusty::Color Black (0.0f, 0.0f, 0.0f, 1.0f);
+	static const dusty::Color Red   (1.0f, 0.0f, 0.0f, 1.0f);
+	static const dusty::Color Green (0.0f, 1.0f, 0.0f, 1.0f);
+	static const dusty::Color Blue  (0.0f, 0.0f, 1.0f, 1.0f);
 }
