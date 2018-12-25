@@ -6,6 +6,10 @@
 
 int main(int argc, char* argv[])
 {
+	srand(time(nullptr));
+
+	using namespace dusty;
+	
 	int result = SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
 	
 	if (result)
@@ -14,7 +18,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	dusty::Window window("Dusty", 800, 600);
+	Window window("Dusty", 640, 480);
 
 	if (!window.Init())
 	{
@@ -22,8 +26,8 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	dusty::Renderer renderer(&window);
-	renderer.SetClearColor(dusty::Color(0.0f, 0.0f, 0.0f, 1.0f));
+	Renderer context(&window);
+	context.SetClearColor(Colors::Black);
 
 	bool running = true;
 	SDL_Event event;
@@ -33,6 +37,13 @@ int main(int argc, char* argv[])
 	
 	int frames = 0;
 	double timer = 0;
+
+
+	float r = (float)rand() / (float)RAND_MAX;
+	float g = (float)rand() / (float)RAND_MAX;
+	float b = (float)rand() / (float)RAND_MAX;
+	float a = (float)rand() / (float)RAND_MAX;
+
 
 	while (running)
 	{
@@ -47,6 +58,12 @@ int main(int argc, char* argv[])
 		{
 			timer -= 1.0;
 			std::cout << "Fps : " << frames << std::endl;
+
+			r = (float)rand() / (float)RAND_MAX;
+			g = (float)rand() / (float)RAND_MAX;
+			b = (float)rand() / (float)RAND_MAX;
+			a = (float)rand() / (float)RAND_MAX;
+
 			frames = 0;
 		}
 
@@ -57,7 +74,8 @@ int main(int argc, char* argv[])
 				case SDL_QUIT:
 				{
 					running = false;
-				} break;
+					break;
+				}
 			}
 		}
 
@@ -68,16 +86,20 @@ int main(int argc, char* argv[])
 			running = false;
 		}
 
-		renderer.Clear();
+		context.Clear();
 
 		float w = window.GetWidth();
-		float h = window.GetHeight() - 3;
+		float h = window.GetHeight();
 
-		renderer.DrawLine(w / 2, 0, 0, h, Colors::Red);
-		renderer.DrawLine(w / 2, 0, w, h, Colors::Green);
-		renderer.DrawLine(0, h, w, h, Colors::Blue);
+		math::Vector2 v0(w / 2, 0.0f);
+		math::Vector2 v1(0, h);
+		math::Vector2 v2(w, h);
 
-		renderer.Update();
+		Color color(r, g, b, a);
+
+		context.DrawSolidTriangle(v0, v1, v2, color);
+
+		context.Update();
 	}
 
 	SDL_Quit();

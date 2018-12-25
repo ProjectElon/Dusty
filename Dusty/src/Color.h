@@ -19,7 +19,7 @@ namespace dusty
 			, a(0.0f)
 		{}
 
-		Color(const float &inR, const float &inG, const float &inB, const float &inA)
+		explicit Color(float inR, float inG, float inB, float inA)
 			: r(inR)
 			, g(inG)
 			, b(inB)

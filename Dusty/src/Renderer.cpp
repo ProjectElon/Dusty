@@ -19,12 +19,12 @@ namespace dusty
 		SDL_LockSurface(mScreen);
 	}
 
-	void Renderer::DrawLine(float x0, float y0, float x1, float y1, const Color& color) const
+	void Renderer::DrawLine(math::Vector2 v0, math::Vector2 v1, const Color& color) const
 	{
-		float dx = x1 - x0;
-		float dy = y1 - y0;
+		float dx = v1.x - v0.x;
+		float dy = v1.y - v0.y;
 		
-		if (dy == 0.0f && dx == 0.0f)
+		if (math::NearZero(dx) && math::NearZero(dy))
 		{
 			return;
 		}
@@ -33,64 +33,180 @@ namespace dusty
 		{
 			if (dy < 0)
 			{
-				std::swap(x0, x1);
-				std::swap(y0, y1);
+				std::swap(v0, v1);
 				dy *= -1;
 			}
 
-			float nx = (x1 - x0) / dy;
-			float ny = (y1 - y0) / dy;
+			math::Vector2 dv = (v1 - v0) / dy;
 
-			float x = x0;
-			float y = y0;
-
-			while (y <= y1)
+			for (math::Vector2 v = v0; v.y <= v1.y; v += dv)
 			{
-				int xd = (int)(x + 0.5f);
-				int yd = (int)(y + 0.5f);
+				int x = (int)ceil(v.x);
+				int y = (int)ceil(v.y);
 
-				x += nx;
-				y += ny;
-
-				if (xd < 0 || xd >= mWindow->GetWidth() ||
-					yd < 0 || yd >= mWindow->GetHeight())
+				if (x < 0 || x >= mWindow->GetWidth() ||
+					y < 0 || y >= mWindow->GetHeight())
 				{
 					continue;
 				}
 
-				SetPixel(xd, yd, color);
+				SetPixel(x, y, color);
 			}
 		}
 		else
 		{
 			if (dx < 0)
 			{
-				std::swap(x0, x1);
-				std::swap(y0, y1);
+				std::swap(v0, v1);
 				dx *= -1;
 			}
 
-			float nx = (x1 - x0) / dx;
-			float ny = (y1 - y0) / dx;
-
-			float x = x0;
-			float y = y0;
-
-			while (x <= x1)
+			math::Vector2 dv = (v1 - v0) / dx;
+			
+			for (math::Vector2 v = v0; v.x <= v1.x; v += dv)
 			{
-				int xd = (int)(x + 0.5f);
-				int yd = (int)(y + 0.5f);
+				int x = (int)ceil(v.x);
+				int y = (int)ceil(v.y);
 
-				x += nx;
-				y += ny;
-
-				if (xd < 0 || xd >= mWindow->GetWidth() ||
-					yd < 0 || yd >= mWindow->GetHeight())
+				if (x < 0 || x >= mWindow->GetWidth() ||
+					y < 0 || y >= mWindow->GetHeight())
 				{
 					continue;
 				}
 				
-				SetPixel(xd, yd, color);
+				SetPixel(x, y, color);
+			}
+		}
+	}
+
+	void Renderer::DrawTriangle(
+		const math::Vector2& v0,
+		const math::Vector2& v1,
+		const math::Vector2& v2,
+		const Color& color) const
+	{
+		DrawLine(v0, v1, color);
+		DrawLine(v0, v2, color);
+		DrawLine(v1, v2, color);
+	}
+
+	void Renderer::DrawSolidTriangle(
+		math::Vector2 v0, 
+		math::Vector2 v1, 
+		math::Vector2 v2, 
+		const Color& color) const
+	{
+
+		if (v2.y < v1.y)
+		{
+			std::swap(v1, v2);
+		}
+
+		if (v1.y < v0.y)
+		{
+			std::swap(v0, v1);
+		}
+
+		if (v2.y < v1.y)
+		{
+			std::swap(v1, v2);
+		}
+
+		if (v0.y < v1.y && v0.y < v2.y && math::IsEqual(v1.y, v2.y))
+		{
+			DrawFlatBottomTriangle(v0, v1, v2, color);
+		}
+		else if (v2.y > v0.y && v2.y > v1.y && math::IsEqual(v0.y, v1.y))
+		{
+			DrawFlatTopTriangle(v2, v1, v0, color);
+		}
+		else
+		{
+			float dvp = v1.y - v0.y;
+			float dv  = v2.y - v0.y;
+			math::Vector2 p = math::Lerp(v0, v2, dvp / dv);
+			DrawFlatBottomTriangle(v0, v1, p, color);
+			DrawFlatTopTriangle(v2, v1, p, color);
+		}
+	}
+
+	void Renderer::DrawFlatBottomTriangle(
+		math::Vector2 v0, 
+		math::Vector2 v1, 
+		math::Vector2 v2, 
+		const Color& color) const
+	{
+
+		float dy0 = v1.y - v0.y;
+		float dy1 = v2.y - v0.y;
+		
+		math::Vector2 dv0 = (v1 - v0) / dy0;
+		math::Vector2 dv1 = (v2 - v0) / dy1;
+
+		for (math::Vector2 va = v0, vb = v0; va.y <= v1.y; va += dv0, vb += dv1)
+		{
+			int minx = (int)ceil(va.x);
+			int maxx = (int)ceil(vb.x);
+			
+			if (minx > maxx) std::swap(minx, maxx);
+
+			int y = (int)ceil(va.y);
+
+			if (y < 0 || y >= mWindow->GetHeight())
+			{
+				continue;
+			}
+
+			for (int x = minx; x < maxx; ++x)
+			{
+				if (x < 0 || x >= mWindow->GetWidth())
+				{
+					continue;
+				}
+
+				SetPixel(x, y, color);
+			}
+
+		}
+	}
+
+	void Renderer::DrawFlatTopTriangle(
+		math::Vector2 v0, 
+		math::Vector2 v1, 
+		math::Vector2 v2, 
+		const Color& color) const
+	{
+		float dy0 = v0.y - v1.y;
+		float dy1 = v0.y - v2.y;
+
+		math::Vector2 dv0 = (v1 - v0) / dy0;
+		math::Vector2 dv1 = (v2 - v0) / dy1;
+
+		for (math::Vector2 va = v0, vb = v0; va.y >= v1.y; va += dv0, vb += dv1)
+		{
+			int minx = (int)ceil(va.x);
+			int maxx = (int)ceil(vb.x);
+			
+			if (minx > maxx)
+			{
+				std::swap(minx, maxx);
+			}
+
+			int y = (int)ceil(va.y);
+
+			if (y < 0 || y >= mWindow->GetHeight())
+			{
+				continue;
+			}
+
+			for (int x = minx; x < maxx; ++x)
+			{
+				if (x < 0 || x >= mWindow->GetWidth())
+				{
+					continue;
+				}
+
+				SetPixel(x, y, color);
 			}
 		}
 	}

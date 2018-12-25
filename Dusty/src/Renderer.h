@@ -1,8 +1,10 @@
 #pragma once
 
 #include "Color.h"
+#include "math/Vector2.h"
 
 #include <SDL/SDL.h>
+#include <iostream>
 
 namespace dusty
 {
@@ -24,7 +26,31 @@ namespace dusty
 			mPixels[mScreen->w * y + x] = color.ToInt(mScreen);
 		}
 		
-		void DrawLine(float x0, float y0, float x1, float y2, const Color& color) const;
+		inline void DrawLine(math::Vector2 v0, math::Vector2 v1, const Color& color) const;
+		
+		void DrawTriangle(
+			const math::Vector2 &v0,
+			const math::Vector2& v1,
+			const math::Vector2& v2,
+			const Color& color) const;
+
+		void DrawSolidTriangle(
+			math::Vector2 v0, 
+			math::Vector2 v1, 
+			math::Vector2 v2, 
+			const Color& color) const;
+
+		void DrawFlatBottomTriangle(
+			math::Vector2 v0, 
+			math::Vector2 v1, 
+			math::Vector2 v2, 
+			const Color& color) const;
+
+		void DrawFlatTopTriangle(
+			math::Vector2 v0,
+			math::Vector2 v1, 
+			math::Vector2 v2, 
+			const Color& color) const;
 
 		void Update() const;
 		
