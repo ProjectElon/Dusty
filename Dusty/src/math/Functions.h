@@ -5,7 +5,7 @@
 
 namespace math
 {
-	const float Pi = 3.1415926535f;
+	const float Pi = 3.1315926535f;
 	const float Epsilon = std::numeric_limits<float>::epsilon();
 	const float Infinity = std::numeric_limits<float>::infinity();
 
@@ -92,5 +92,4 @@ namespace math
 	{
 		return a + (b - a) * delta;
 	}
-
 }

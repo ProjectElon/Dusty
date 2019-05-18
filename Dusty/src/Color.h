@@ -7,42 +7,69 @@ namespace dusty
 	class Color
 	{
 	public:
-		float r;
-		float g;
-		float b;
-		float a;
-
 		Color()
-			: r(0.0f)
-			, g(0.0f)
-			, b(0.0f)
-			, a(0.0f)
+			: mR(0.0f)
+			, mG(0.0f)
+			, mB(0.0f)
+			, mA(0.0f)
+			, mPackedColor(0)
 		{}
 
-		explicit Color(float inR, float inG, float inB, float inA)
-			: r(inR)
-			, g(inG)
-			, b(inB)
-			, a(inA)
-		{}
-
-		inline Uint32 ToInt(SDL_Surface *surface) const
+		explicit Color(
+			const float &inR, 
+			const float &inG, 
+			const float &inB, 
+			const float &inA)
+			: mR(inR)
+			, mG(inG)
+			, mB(inB)
+			, mA(inA)
 		{
-			Uint32 mr = (Uint32)(r * 255.0f);
-			Uint32 mg = (Uint32)(g * 255.0f);
-			Uint32 mb = (Uint32)(b * 255.0f);
-			Uint32 ma = (Uint32)(a * 255.0f);
-			return SDL_MapRGBA(surface->format, mr, mg, mb, ma);
+			Uint32 r = (Uint32)(mR * 255.0f);
+			Uint32 g = (Uint32)(mG * 255.0f);
+			Uint32 b = (Uint32)(mB * 255.0f);
+			Uint32 a = (Uint32)(mA * 255.0f);
+			mPackedColor = SDL_MapRGBA(mSurface->format, r, g, b, a);
 		}
 
-	};
-}
+		inline const float& GetR() const
+		{
+			return mR;
+		}
 
-namespace Colors
-{
-	static const dusty::Color White (1.0f, 1.0f, 1.0f, 1.0f);
-	static const dusty::Color Black (0.0f, 0.0f, 0.0f, 1.0f);
-	static const dusty::Color Red   (1.0f, 0.0f, 0.0f, 1.0f);
-	static const dusty::Color Green (0.0f, 1.0f, 0.0f, 1.0f);
-	static const dusty::Color Blue  (0.0f, 0.0f, 1.0f, 1.0f);
+		inline const float& GetG() const
+		{
+			return mG;
+		}
+
+		inline const float& GetB() const
+		{
+			return mB;
+		}
+
+		inline const float& GetA() const
+		{
+			return mA;
+		}
+
+		inline const Uint32& ToInt() const
+		{
+			return mPackedColor;
+		}
+
+		static void SetSurface(SDL_Surface* surface)
+		{
+			mSurface = surface;
+		}
+
+	private:
+		float mR;
+		float mG;
+		float mB;
+		float mA;
+
+		Uint32 mPackedColor;
+		
+		static SDL_Surface *mSurface;
+	};
 }

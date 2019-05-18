@@ -143,7 +143,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\Color.cpp" />
     <ClCompile Include="src\math\Functions.cpp" />
+    <ClCompile Include="src\math\Math.cpp" />
+    <ClCompile Include="src\math\Matrix3.cpp" />
+    <ClCompile Include="src\math\Matrix4.cpp" />
     <ClCompile Include="src\math\Vector2.cpp" />
     <ClCompile Include="src\math\Vector3.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
@@ -152,9 +156,13 @@
   <ItemGroup>
     <ClInclude Include="src\Color.h" />
     <ClInclude Include="src\math\Functions.h" />
+    <ClInclude Include="src\math\Math.h" />
+    <ClInclude Include="src\math\Matrix3.h" />
+    <ClInclude Include="src\math\Matrix4.h" />
     <ClInclude Include="src\math\Vector2.h" />
     <ClInclude Include="src\math\Vector3.h" />
     <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\Vertex.h" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

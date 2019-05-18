@@ -1,13 +1,10 @@
 #include "Window.h"
 #include "Renderer.h"
-
-#include <iostream>
-#include <ctime>
+#include "Vertex.h"
+#include <vector>
 
 int main(int argc, char* argv[])
 {
-	srand(time(nullptr));
-
 	using namespace dusty;
 	
 	int result = SDL_Init(SDL_INIT_TIMER | SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER);
@@ -18,7 +15,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	Window window("Dusty", 640, 480);
+	Window window("Dusty", 800, 600);
 
 	if (!window.Init())
 	{
@@ -27,43 +24,66 @@ int main(int argc, char* argv[])
 	}
 
 	Renderer context(&window);
-	context.SetClearColor(Colors::Black);
+	context.SetClearColor(Color(0.0f, 0.0f, 0.0f, 1.0f));
+	
+	const Color White(1.0f, 1.0f, 1.0f, 0.0f);
+	const Color Red(1.0f, 0.0f, 0.0f, 1.0f);
+	const Color Blue(0.0f, 0.0f, 1.0f, 1.0f);
 
 	bool running = true;
 	SDL_Event event;
 
-	Uint64 previousTime    = SDL_GetPerformanceCounter();
+	Uint64 previousTime = SDL_GetPerformanceCounter();
 	const Uint64 frequency = SDL_GetPerformanceFrequency();
 	
 	int frames = 0;
-	double timer = 0;
+	float timer = 0;
 
+	std::vector< Vertex > vertices =
+	{
+		{ math::Vector3( -1, -1, -1) },
+		{ math::Vector3(  1, -1, -1) },
+		{ math::Vector3(  1,  1, -1) },
+		{ math::Vector3( -1,  1, -1) },
+		{ math::Vector3( -1, -1,  1) },
+		{ math::Vector3(  1, -1,  1) },
+		{ math::Vector3(  1,  1,  1) },
+		{ math::Vector3( -1,  1,  1) }
+	};
 
-	float r = (float)rand() / (float)RAND_MAX;
-	float g = (float)rand() / (float)RAND_MAX;
-	float b = (float)rand() / (float)RAND_MAX;
-	float a = (float)rand() / (float)RAND_MAX;
+	std::vector< unsigned int > indices =
+	{
+		0, 1, 3, 
+		3, 1, 2,
+		1, 5, 2, 
+		2, 5, 6,
+		5, 4, 6, 
+		6, 4, 7,
+		4, 0, 7, 
+		7, 0, 3,
+		3, 2, 7, 
+		7, 2, 6,
+		4, 5, 0, 
+		0, 5, 1
+	};
 
+	VertexList list(vertices, indices);
+
+	float angle = 0.0f;
 
 	while (running)
 	{
 		Uint64 currentTime = SDL_GetPerformanceCounter();
-		double deltaTime = (double)(currentTime - previousTime) / (double)frequency;
+		float deltaTime = (float)(currentTime - previousTime) / (float)frequency;
 		previousTime = currentTime;
 
 		++frames;
 		timer += deltaTime;
 
-		if (timer >= 1.0)
+		if (timer >= 1.0f)
 		{
-			timer -= 1.0;
-			std::cout << "Fps : " << frames << std::endl;
-
-			r = (float)rand() / (float)RAND_MAX;
-			g = (float)rand() / (float)RAND_MAX;
-			b = (float)rand() / (float)RAND_MAX;
-			a = (float)rand() / (float)RAND_MAX;
-
+			timer -= 1.0f;
+			printf("FPS : %d\n", frames);
 			frames = 0;
 		}
 
@@ -86,18 +106,16 @@ int main(int argc, char* argv[])
 			running = false;
 		}
 
+		angle += deltaTime * 30.0f;
+		if (angle > 360.0f) angle -= 360.0f;
+
+		math::Matrix4 rotation    = math::RotationY(math::ToRadians(angle));
+		math::Matrix4 scale		  = math::Scale(math::Vector3(500.0f, 500.0f, 1.0f));
+		math::Matrix4 translation = math::Translation(math::Vector3(0.0f, 0.0f, 5.0f));
+
 		context.Clear();
 
-		float w = window.GetWidth();
-		float h = window.GetHeight();
-
-		math::Vector2 v0(w / 2, 0.0f);
-		math::Vector2 v1(0, h);
-		math::Vector2 v2(w, h);
-
-		Color color(r, g, b, a);
-
-		context.DrawSolidTriangle(v0, v1, v2, color);
+		context.DrawVertexList(list, Red, rotation * scale * translation);
 
 		context.Update();
 	}
