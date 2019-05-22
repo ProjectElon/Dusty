@@ -2,21 +2,17 @@
 #include "Window.h"
 #include "Vertex.h"
 
-#include <iostream>
-
 namespace dusty
 {
 	Renderer::Renderer(Window* window)
-		: mWindow(window)
-		, mScreen(window->GetSurface())
-		, mPixels((Uint32*)(mScreen->pixels))
-	{
-		Color::SetSurface(window->GetSurface());
-	}
+		: m_Window(window)
+		, m_Screen(window->GetSurface())
+		, m_Pixels(reinterpret_cast<Uint32*>(m_Screen->pixels))
+	{}
 
 	Renderer::~Renderer() {}
 
-	void Renderer::DrawLine(math::Vector2 v0, math::Vector2 v1, const Color& color) const
+	void Renderer::DrawLine(math::Vector2 v0, math::Vector2 v1, const math::Vector3& color) const
 	{
 		bool steep = false;
 		
@@ -69,149 +65,183 @@ namespace dusty
 		}
 	}
 
-	void Renderer::DrawTriangle(
-		const math::Vector2& v0,
-		const math::Vector2& v1,
-		const math::Vector2& v2,
-		const Color& color) const
+	void Renderer::DrawLine(const math::Vector3& v0, const math::Vector3& v1, const math::Vector3& color)
 	{
-		DrawLine(v0, v1, color);
-		DrawLine(v0, v2, color);
-		DrawLine(v1, v2, color);
+		math::Vector2 p0 = TransformToScreenSpace(v0.PerspectiveDivide()).ToVector2();
+		math::Vector2 p1 = TransformToScreenSpace(v1.PerspectiveDivide()).ToVector2();
+		DrawLine(p0, p1, color);
 	}
 
-	void Renderer::DrawFlatBottomTriangle(
-		const math::Vector2& v0, 
-		const math::Vector2& v1, 
-		const math::Vector2& v2, 
-		const Color& color) const
+	void Renderer::RenderFlatBottomTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2) 
 	{
-		float dy  = (v1.y - v0.y);
-		float dx0 = (v1.x - v0.x) / dy;
-		float dx1 = (v2.x - v0.x) / dy;
+		float dy  = (v1.position.y - v0.position.y);
+		float dx0 = (v1.position.x - v0.position.x) / dy;
+		float dx1 = (v2.position.x - v0.position.x) / dy;
 
-		int maxY = static_cast<int>(ceil(v1.y));
-		int currentY = static_cast<int>(ceil(v0.y));
+		int yStart = static_cast<int>(ceil(v0.position.y));
+		int yEnd   = static_cast<int>(ceil(v1.position.y));
 
-		for (float x0 = v0.x, x1 = v0.x; currentY < maxY; currentY++, x0 += dx0, x1 += dx1)
+		float yPreStep = yStart - v0.position.y;
+		float x0 = v0.position.x + yPreStep * dx0;
+		float x1 = v0.position.x + yPreStep * dx1;
+
+		for (int y = yStart; y < yEnd; ++y)
 		{
-			int minX = static_cast< int >(ceil(x0));
-			int maxX = static_cast< int >(ceil(x1));
-			
-			for (int x = minX; x <= maxX; ++x)
+			int xStart = static_cast< int >(ceil(x0));
+			int xEnd   = static_cast< int >(ceil(x1));
+
+			for (int x = xStart; x < xEnd; ++x)
 			{
-				SetPixel(x, currentY, color);
+				float xp = x + 0.5f;
+				float yp = y + 0.5f;
+
+				float cls0 = yp - v0.position.y;
+
+				Vertex p0 = math::Lerp(v0, v1, cls0 / dy);
+				Vertex p1 = math::Lerp(v0, v2, cls0 / dy);
+
+				float cls1 = xp - p0.position.x;
+				float dx   = p1.position.x - p0.position.x;
+
+				math::Vector3 color = math::Lerp(p0.color, p1.color, cls1 / dx);
+
+				SetPixel(x, y, color);
 			}
+
+			x0 += dx0;
+			x1 += dx1;
+		}
+	}
+	
+	void Renderer::RenderFlatTopTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2)
+	{
+		float dy  = (v0.position.y - v1.position.y);
+		float dx0 = (v0.position.x - v1.position.x) / dy;
+		float dx1 = (v0.position.x - v2.position.x) / dy;
+
+		int yStart = static_cast<int>(ceil(v1.position.y));
+		int yEnd   = static_cast<int>(ceil(v0.position.y));
+
+		float yPreStep = yStart - v1.position.y;
+		float x0 = v1.position.x + yPreStep * dx0;
+		float x1 = v2.position.x + yPreStep * dx1;
+
+		for (int y = yStart; y < yEnd; ++y)
+		{
+			int xStart = static_cast< int >(ceil(x0));
+			int xEnd   = static_cast< int >(ceil(x1));
+
+			for (int x = xStart; x < xEnd; ++x)
+			{
+				float xp = x + 0.5f;
+				float yp = y + 0.5f;
+
+				float cls0 = yp - v1.position.y;
+
+				Vertex p0 = math::Lerp(v1, v0, cls0 / dy);
+				Vertex p1 = math::Lerp(v2, v0, cls0 / dy);
+
+				float cls1 = xp - p0.position.x;
+				float dx   = p1.position.x - p0.position.x;
+
+				math::Vector3 color = math::Lerp(p0.color, p1.color, cls1 / dx);
+
+				SetPixel(x, y, color);
+			}
+
+			x0 += dx0;
+			x1 += dx1;
 		}
 	}
 
-	void Renderer::DrawFlatTopTriangle(
-		const math::Vector2 &v0, 
-		const math::Vector2 &v1, 
-		const math::Vector2 &v2, 
-		const Color& color) const
+	void Renderer::RenderTriangle(Vertex v0, Vertex v1, Vertex v2) 
 	{
-		float dy  = (v0.y - v1.y);
-		float dx0 = (v0.x - v1.x) / dy;
-		float dx1 = (v0.x - v2.x) / dy;
-		
-		int maxY = static_cast< int >(ceil(v0.y));
-		int currentY = static_cast< int > (ceil(v1.y));
-
-		for (float x0 = v1.x, x1 = v2.x; currentY < maxY; currentY++, x0 += dx0, x1 += dx1)
-		{
-			int minX = static_cast< int >(ceil(x0));
-			int maxX = static_cast< int >(ceil(x1));
-			
-			for (int x = minX; x <= maxX; ++x)
-			{
-				SetPixel(x, currentY, color);
-			}
-		}
-	}
-
-	void Renderer::DrawSolidTriangle(
-		math::Vector2 v0,
-		math::Vector2 v1,
-		math::Vector2 v2,
-		const Color& color) const
-	{
-		if (v2.y < v1.y)
+		if (v2.position.y < v1.position.y)
 		{
 			std::swap(v1, v2);
 		}
 
-		if (v1.y < v0.y)
+		if (v1.position.y < v0.position.y)
 		{
 			std::swap(v0, v1);
 		}
 
-		if (v2.y < v1.y)
+		if (v2.position.y < v1.position.y)
 		{
 			std::swap(v1, v2);
 		}
 
-		if (math::IsEqual(v1.y, v2.y))
+		if (math::IsEqual(v1.position.y, v2.position.y))
 		{
-			if (v1.x > v2.x)
+			if (v1.position.x > v2.position.x)
 			{
 				std::swap(v1, v2);
 			}
 		}
 
-		if (math::IsEqual(v0.y, v1.y))
+		if (math::IsEqual(v0.position.y, v1.position.y))
 		{
-			if (v0.x > v1.x)
+			if (v0.position.x > v1.position.x)
 			{
 				std::swap(v0, v1);
 			}
 		}
 
-		if (v0.y < v1.y && v0.y < v2.y && math::IsEqual(v1.y, v2.y))
+		if (v0.position.y < v1.position.y && v0.position.y < v2.position.y && math::IsEqual(v1.position.y, v2.position.y))
 		{
-			DrawFlatBottomTriangle(v0, v1, v2, color);
+			RenderFlatBottomTriangle(v0, v1, v2);
 		}
-		else if (v2.y > v0.y && v2.y > v1.y && math::IsEqual(v0.y, v1.y))
+		else if (v2.position.y > v0.position.y && v2.position.y > v1.position.y && math::IsEqual(v0.position.y, v1.position.y))
 		{
-			DrawFlatTopTriangle(v2, v0, v1, color);
+			RenderFlatTopTriangle(v2, v0, v1);
 		}
 		else
 		{
-			float cls = (v1.y - v0.y);
-			float dis = (v2.y - v0.y);
-			
-			math::Vector2 alphaSplit = math::Lerp(v0, v2, cls / dis);
-			
-			if (v1.x > alphaSplit.x)
+			float cls = (v1.position.y - v0.position.y);
+			float dis = (v2.position.y - v0.position.y);
+
+			Vertex alphaSplit = math::Lerp(v0, v2, cls / dis);
+
+			if (v1.position.x > alphaSplit.position.x)
 			{
 				std::swap(v1, alphaSplit);
 			}
 
-			DrawFlatBottomTriangle(v0, v1, alphaSplit, color);
-			DrawFlatTopTriangle(v2, v1, alphaSplit, color);
+			RenderFlatBottomTriangle(v0, v1, alphaSplit);
+			RenderFlatTopTriangle(v2, v1, alphaSplit);
 		}
 	}
 
-	void Renderer::DrawVertexList(const VertexList& list, const Color& color, const math::Matrix4& mvp)
+	void Renderer::RenderVertexList(const VertexList& list, const math::Matrix4& mvp) 
 	{
-		const std::vector< Vertex > &vertices = list.GetVertices();
-		const std::vector< unsigned int > &indices = list.GetIndices();
+		const std::vector< Vertex >& vertices = list.GetVertices();
+		const std::vector< unsigned int >& indices = list.GetIndices();
 
 		for (unsigned int i = 0; i < indices.size(); i += 3)
 		{
-			math::Vector3 p0 = vertices[ indices[i + 0] ].position;
-			math::Vector3 p1 = vertices[ indices[i + 1] ].position;
-			math::Vector3 p2 = vertices[ indices[i + 2] ].position;
-			
-			math::Vector2 v0 = ApplyPerspective(p0 * mvp);
-			math::Vector2 v1 = ApplyPerspective(p1 * mvp);
-			math::Vector2 v2 = ApplyPerspective(p2 * mvp);
+			Vertex v0 = vertices[indices[i + 0]];
+			Vertex v1 = vertices[indices[i + 1]];
+			Vertex v2 = vertices[indices[i + 2]];
 
-			ToScreenSpace(v0);
-			ToScreenSpace(v1);
-			ToScreenSpace(v2);
+			v0.position = v0.position * mvp;
+			v1.position = v1.position * mvp;
+			v2.position = v2.position * mvp;
 
-			DrawSolidTriangle(v0, v1, v2, color);
+			math::Vector3 normal = math::Vector3::Cross(v1.position - v0.position, v2.position - v0.position);
+
+			float close = math::Vector3::Dot(v0.position, normal);
+
+			if (close > 0.0f)
+			{
+				return;
+			}
+
+			v0.position = TransformToScreenSpace(v0.position.PerspectiveDivide());
+			v1.position = TransformToScreenSpace(v1.position.PerspectiveDivide());
+			v2.position = TransformToScreenSpace(v2.position.PerspectiveDivide());
+
+			RenderTriangle(v0, v1, v2);
 		}
 	}
+
 }

@@ -10,6 +10,8 @@
 
 namespace math
 {
+	class Vector2;
+
 	class Vector3
 	{
 	public:
@@ -154,7 +156,7 @@ namespace math
 			return lhs.x * rhs.x + lhs.y * rhs.y + lhs.z * rhs.z;
 		}
 
-		static inline Vector3 Croos(const Vector3& lhs, const Vector3& rhs)
+		static inline Vector3 Cross(const Vector3& lhs, const Vector3& rhs)
 		{
 			return Vector3(
 				lhs.y * rhs.z - lhs.z * rhs.y,
@@ -162,6 +164,18 @@ namespace math
 				lhs.x * rhs.y - lhs.y * rhs.x
 			);
 		}
+
+		inline Vector3 PerspectiveDivide() const
+		{
+			float invZ = 1.0f / z;
+			return Vector3(
+				x * invZ,
+				y * invZ,
+				1.0f
+			);
+		}
+
+		Vector2 ToVector2() const;
 
 		std::string ToString() const
 		{

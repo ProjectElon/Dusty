@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Color.h"
 #include "math/Math.h"
 #include "Window.h"
 
@@ -19,87 +18,66 @@ namespace dusty
 		Renderer(Window* window);
 		~Renderer();
 
+		inline Uint32 GetIncodedColor(const math::Vector3& color) const
+		{
+			return SDL_MapRGBA(
+				m_Screen->format, 
+				(Uint8)(color.x * 255.0f), 
+				(Uint8)(color.y * 255.0f), 
+				(Uint8)(color.z * 255.0f), 255
+			);
+		}
+
 		inline void Clear() const
 		{
-			SDL_FillRect(mScreen, nullptr, mClearColor.ToInt());
-			SDL_LockSurface(mScreen);
+			SDL_FillRect(m_Screen, nullptr, GetIncodedColor(m_ClearColor));
+			SDL_LockSurface(m_Screen);
 		}
 
-		inline void SetClearColor(const Color& color)
+		inline void SetClearColor(const math::Vector3& color)
 		{
-			mClearColor = color;
+			m_ClearColor = color;
 		}
 
-		inline void ToScreenSpace(math::Vector2& vector) const
+		inline math::Vector3 TransformToScreenSpace(const math::Vector3& vector) const
 		{
-			vector.x = vector.x + (mWindow->GetWidth() / 2.0f);
-			vector.y = (mWindow->GetHeight() / 2.0f) - vector.y;
-		}
+			math::Vector3 result;
 
-		inline math::Vector2 ApplyPerspective(const math::Vector3& vector)
-		{
-			math::Vector2 result;
-			
-			float invZ = 1.0f / vector.z;
-			
-			result.x = vector.x * invZ;
-			result.y = vector.y * invZ;
-			
+			result.x = vector.x + (m_Window->GetWidth() / 2.0f);
+			result.y = (m_Window->GetHeight() / 2.0f) - vector.y;
+			result.z = vector.z;
+
 			return result;
 		}
 
-		inline void SetPixel(const size_t &x, const size_t &y, const Color& color) const
+		inline void SetPixel(const size_t& x, const size_t& y, const math::Vector3& color) const
 		{
-			
-			if (x < 0 || x >= mWindow->GetWidth() || y < 0 || y >= mWindow->GetHeight())
+			if (x < 0 || x >= m_Window->GetWidth() || y < 0 || y >= m_Window->GetHeight())
 			{
 				return;
 			}
 
-			mPixels[mScreen->w * y + x] = color.ToInt();
+			m_Pixels[m_Screen->w * y + x] = GetIncodedColor(color);
 		}
+
+		void DrawLine(math::Vector2 v0, math::Vector2 v1, const math::Vector3& color) const;
+		void DrawLine(const math::Vector3& v0, const math::Vector3& v1, const math::Vector3& color);
 		
-		inline void DrawLine(math::Vector2 v0, math::Vector2 v1, const Color& color) const;
-		
-		void DrawTriangle(
-			const math::Vector2& v0,
-			const math::Vector2& v1,
-			const math::Vector2& v2,
-			const Color& color) const;
+		void RenderFlatBottomTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2);
+		void RenderFlatTopTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2);
+		void RenderTriangle(Vertex v0, Vertex v1, Vertex v2);
+		void RenderVertexList(const VertexList& list, const math::Matrix4& mvp = math::Matrix4::Identity);
 
-		void DrawFlatBottomTriangle(
-			const math::Vector2 &v0, 
-			const math::Vector2 &v1, 
-			const math::Vector2 &v2, 
-			const Color& color) const;
-
-		void DrawFlatTopTriangle(
-			const math::Vector2 &v0,
-			const math::Vector2 &v1, 
-			const math::Vector2 &v2, 
-			const Color& color) const;
-
-		void DrawSolidTriangle(
-			math::Vector2 v0, 
-			math::Vector2 v1, 
-			math::Vector2 v2, 
-			const Color& color) const;
-		
-		void DrawVertexList(
-			const VertexList& list, 
-			const Color& color, 
-			const math::Matrix4& mvp = math::Matrix4::Identity);
-
-		void Update() const
+		inline void Update() const
 		{
-			SDL_UnlockSurface(mScreen);
-			SDL_UpdateWindowSurface(mWindow->GetHandle());
+			SDL_UnlockSurface(m_Screen);
+			SDL_UpdateWindowSurface(m_Window->GetHandle());
 		}
 		
 	private:
-		class Window *mWindow;
-		SDL_Surface  *mScreen;
-		Color	      mClearColor;
-		Uint32		 *mPixels;
+		class Window *m_Window;
+		SDL_Surface  *m_Screen;
+		math::Vector3 m_ClearColor;
+		Uint32		 *m_Pixels;
 	};
 }

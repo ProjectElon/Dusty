@@ -24,12 +24,8 @@ int main(int argc, char* argv[])
 	}
 
 	Renderer context(&window);
-	context.SetClearColor(Color(0.0f, 0.0f, 0.0f, 1.0f));
+	context.SetClearColor(math::Vector3(0.0f, 0.0f, 0.0f));
 	
-	const Color White(1.0f, 1.0f, 1.0f, 0.0f);
-	const Color Red(1.0f, 0.0f, 0.0f, 1.0f);
-	const Color Blue(0.0f, 0.0f, 1.0f, 1.0f);
-
 	bool running = true;
 	SDL_Event event;
 
@@ -41,35 +37,21 @@ int main(int argc, char* argv[])
 
 	std::vector< Vertex > vertices =
 	{
-		{ math::Vector3( -1, -1, -1) },
-		{ math::Vector3(  1, -1, -1) },
-		{ math::Vector3(  1,  1, -1) },
-		{ math::Vector3( -1,  1, -1) },
-		{ math::Vector3( -1, -1,  1) },
-		{ math::Vector3(  1, -1,  1) },
-		{ math::Vector3(  1,  1,  1) },
-		{ math::Vector3( -1,  1,  1) }
+		{ math::Vector3(-0.5f, -0.5f, -0.5f), math::Vector3(0.0f, 1.0f, 0.0f) },
+		{ math::Vector3( 0.5f,  0.5f, -0.5f), math::Vector3(0.0f, 0.0f, 1.0f) },
+		{ math::Vector3( 0.5f, -0.5f, -0.5f), math::Vector3(1.0f, 0.0f, 0.0f) }
 	};
 
 	std::vector< unsigned int > indices =
 	{
-		0, 1, 3, 
-		3, 1, 2,
-		1, 5, 2, 
-		2, 5, 6,
-		5, 4, 6, 
-		6, 4, 7,
-		4, 0, 7, 
-		7, 0, 3,
-		3, 2, 7, 
-		7, 2, 6,
-		4, 5, 0, 
-		0, 5, 1
+		0, 1, 2
 	};
 
 	VertexList list(vertices, indices);
 
-	float angle = 0.0f;
+	float pitch = 0.0f;
+	float yaw   = 0.0f;
+	float speed = 50.0f;
 
 	while (running)
 	{
@@ -106,16 +88,35 @@ int main(int argc, char* argv[])
 			running = false;
 		}
 
-		angle += deltaTime * 30.0f;
-		if (angle > 360.0f) angle -= 360.0f;
+		if (keyState[SDL_SCANCODE_UP])
+		{
+			pitch += deltaTime * speed;
+		}
 
-		math::Matrix4 rotation    = math::RotationY(math::ToRadians(angle));
-		math::Matrix4 scale		  = math::Scale(math::Vector3(500.0f, 500.0f, 1.0f));
+		if (keyState[SDL_SCANCODE_DOWN])
+		{
+			pitch -= deltaTime * speed;
+		}
+
+		if (keyState[SDL_SCANCODE_RIGHT])
+		{
+			yaw -= deltaTime * speed;
+		}
+
+		if (keyState[SDL_SCANCODE_LEFT])
+		{
+			yaw += deltaTime * speed;
+		}
+
+		math::Matrix4 rotation	  = math::RotationX(math::ToRadians(pitch)) *
+								    math::RotationY(math::ToRadians(yaw));
+		
+		math::Matrix4 scale		  = math::Scale(math::Vector3(1000.0f, 1000.0f, 1.0f));
 		math::Matrix4 translation = math::Translation(math::Vector3(0.0f, 0.0f, 5.0f));
 
 		context.Clear();
 
-		context.DrawVertexList(list, Red, rotation * scale * translation);
+		context.RenderVertexList(list, rotation * scale * translation);
 
 		context.Update();
 	}

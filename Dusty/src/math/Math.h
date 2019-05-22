@@ -153,12 +153,6 @@ namespace math
 		return Transform(vec, mat);
 	}
 
-	static inline Vector2& operator*=(Vector2& vec, const Matrix3& mat)
-	{
-		vec = Transform(vec, mat);
-		return vec;
-	}
-
 	static inline Vector3 operator*(const Vector3& vec, const Matrix4& mat)
 	{
 		return Transform(vec, mat);

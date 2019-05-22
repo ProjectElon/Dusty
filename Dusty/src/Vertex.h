@@ -10,6 +10,31 @@ namespace dusty
 	{
 	public:
 		math::Vector3 position;
+		math::Vector3 color;
+
+		inline Vertex operator+(const Vertex& other) const
+		{
+			Vertex result;
+			result.position = position + other.position;
+			result.color = color + other.color;
+			return result;
+		}
+
+		inline Vertex operator-(const Vertex& other) const
+		{
+			Vertex result;
+			result.position = position - other.position;
+			result.color = color - other.color;
+			return result;
+		}
+
+		inline Vertex operator*(const float& scalar)
+		{
+			Vertex result;
+			result.position = position * scalar;
+			result.color = color * scalar;
+			return result;
+		}
 	};
 
 	class VertexList

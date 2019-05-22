@@ -1,4 +1,5 @@
 #include "Vector3.h"
+#include "Vector2.h"
 
 namespace math
 {
@@ -30,4 +31,9 @@ namespace math
 		, y(vector.y)
 		, z(vector.z)
 	{}
+
+	Vector2 Vector3::ToVector2() const
+	{
+		return Vector2(x, y);
+	}
 }
