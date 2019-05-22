@@ -15,25 +15,38 @@ namespace dusty
 		inline Vertex operator+(const Vertex& other) const
 		{
 			Vertex result;
+			
 			result.position = position + other.position;
 			result.texCoord = texCoord + other.texCoord;
+
 			return result;
 		}
 
 		inline Vertex operator-(const Vertex& other) const
 		{
 			Vertex result;
+			
 			result.position = position - other.position;
 			result.texCoord = texCoord - other.texCoord;
+
 			return result;
 		}
 
 		inline Vertex operator*(const float& scalar)
 		{
 			Vertex result;
+			
 			result.position = position * scalar;
 			result.texCoord = texCoord * scalar;
+			
 			return result;
+		}
+
+		inline Vertex& operator*=(const float& scalar)
+		{
+			position *= scalar;
+			texCoord *= scalar;
+			return *this;
 		}
 	};
 

@@ -3,13 +3,14 @@
 #include "math/Math.h"
 #include "Window.h"
 #include "Texture.h"
+#include "Vertex.h"
+#include "ZBuffer.h"
 
 #include <SDL/SDL.h>
 #include <cstdio>
 
 namespace dusty
 {
-
 	class Vertex;
 	class VertexList;
 
@@ -32,8 +33,10 @@ namespace dusty
 
 		inline void Begin() const
 		{
-			SDL_FillRect(m_Screen, nullptr, GetIncodedColor(m_ClearColor));
+			static unsigned int color = GetIncodedColor(m_ClearColor);
+			SDL_FillRect(m_Screen, nullptr, color);
 			SDL_LockSurface(m_Screen);
+			m_ZBuffer->Clear();
 		}
 
 		inline void SetClearColor(const math::Vector3& color)
@@ -41,15 +44,17 @@ namespace dusty
 			m_ClearColor = color;
 		}
 
-		inline math::Vector3 TransformToScreenSpace(const math::Vector3& vector) const
+		inline Vertex& Transform(Vertex& v) const
 		{
-			math::Vector3 result;
+			float zInv = 1.0f / v.position.z;
 
-			result.x = vector.x + (m_Window->GetWidth() / 2.0f);
-			result.y = (m_Window->GetHeight() / 2.0f) - vector.y;
-			result.z = vector.z;
+			v *= zInv;
+			v.position.z = zInv;
 
-			return result;
+			v.position.x = v.position.x + (m_Window->GetWidth() / 2.0f);
+			v.position.y = (m_Window->GetHeight() / 2.0f) - v.position.y;
+
+			return v;
 		}
 
 		inline void SetPixel(const size_t& x, const size_t& y, const math::Vector3& color) const
@@ -73,7 +78,6 @@ namespace dusty
 		}
 
 		void DrawLine(math::Vector2 v0, math::Vector2 v1, const math::Vector3& color) const;
-		void DrawLine(const math::Vector3& v0, const math::Vector3& v1, const math::Vector3& color);
 		
 		void RenderFlatBottomTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Texture& texture);
 		void RenderFlatTopTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Texture& texture);
@@ -91,5 +95,6 @@ namespace dusty
 		SDL_Surface  *m_Screen;
 		math::Vector3 m_ClearColor;
 		Uint32		 *m_Pixels;
+		ZBuffer      *m_ZBuffer;
 	};
 }

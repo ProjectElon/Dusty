@@ -165,16 +165,6 @@ namespace math
 			);
 		}
 
-		inline Vector3 PerspectiveDivide() const
-		{
-			float invZ = 1.0f / z;
-			return Vector3(
-				x * invZ,
-				y * invZ,
-				1.0f
-			);
-		}
-
 		Vector2 ToVector2() const;
 
 		std::string ToString() const
