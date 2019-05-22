@@ -37,9 +37,9 @@ int main(int argc, char* argv[])
 
 	std::vector< Vertex > vertices =
 	{
-		{ math::Vector3(-0.5f, -0.5f, -0.5f), math::Vector3(0.0f, 1.0f, 0.0f) },
-		{ math::Vector3( 0.5f,  0.5f, -0.5f), math::Vector3(0.0f, 0.0f, 1.0f) },
-		{ math::Vector3( 0.5f, -0.5f, -0.5f), math::Vector3(1.0f, 0.0f, 0.0f) }
+		{ math::Vector3( 0.0f,  1.0f, 1.0f), math::Vector2(0.5f, 0.0f) },
+		{ math::Vector3(-1.0f, -1.0f, 1.0f), math::Vector2(0.0f, 1.0f) },
+		{ math::Vector3( 1.0f, -1.0f, 1.0f), math::Vector2(1.0f, 1.0f) }
 	};
 
 	std::vector< unsigned int > indices =
@@ -53,10 +53,17 @@ int main(int argc, char* argv[])
 	float yaw   = 0.0f;
 	float speed = 50.0f;
 
+	Texture brick("../res/brick.jpg");
+
+	if (!brick.Load())
+	{
+		return -1;
+	}
+
 	while (running)
 	{
 		Uint64 currentTime = SDL_GetPerformanceCounter();
-		float deltaTime = (float)(currentTime - previousTime) / (float)frequency;
+		float deltaTime = static_cast< float >((double)(currentTime - previousTime) / (double)frequency);
 		previousTime = currentTime;
 
 		++frames;
@@ -100,12 +107,12 @@ int main(int argc, char* argv[])
 
 		if (keyState[SDL_SCANCODE_RIGHT])
 		{
-			yaw -= deltaTime * speed;
+			yaw += deltaTime * speed;
 		}
 
 		if (keyState[SDL_SCANCODE_LEFT])
 		{
-			yaw += deltaTime * speed;
+			yaw -= deltaTime * speed;
 		}
 
 		math::Matrix4 rotation	  = math::RotationX(math::ToRadians(pitch)) *
@@ -114,11 +121,11 @@ int main(int argc, char* argv[])
 		math::Matrix4 scale		  = math::Scale(math::Vector3(1000.0f, 1000.0f, 1.0f));
 		math::Matrix4 translation = math::Translation(math::Vector3(0.0f, 0.0f, 5.0f));
 
-		context.Clear();
+		context.Begin();
 
-		context.RenderVertexList(list, rotation * scale * translation);
+		context.RenderVertexList(list, brick, rotation * scale * translation);
 
-		context.Update();
+		context.End();
 	}
 
 	SDL_Quit();

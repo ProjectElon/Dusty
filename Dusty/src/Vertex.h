@@ -10,13 +10,13 @@ namespace dusty
 	{
 	public:
 		math::Vector3 position;
-		math::Vector3 color;
+		math::Vector2 texCoord;
 
 		inline Vertex operator+(const Vertex& other) const
 		{
 			Vertex result;
 			result.position = position + other.position;
-			result.color = color + other.color;
+			result.texCoord = texCoord + other.texCoord;
 			return result;
 		}
 
@@ -24,7 +24,7 @@ namespace dusty
 		{
 			Vertex result;
 			result.position = position - other.position;
-			result.color = color - other.color;
+			result.texCoord = texCoord - other.texCoord;
 			return result;
 		}
 
@@ -32,7 +32,7 @@ namespace dusty
 		{
 			Vertex result;
 			result.position = position * scalar;
-			result.color = color * scalar;
+			result.texCoord = texCoord * scalar;
 			return result;
 		}
 	};
