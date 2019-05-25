@@ -1,7 +1,7 @@
 #include "Window.h"
 #include "Renderer.h"
 #include "Vertex.h"
-#include <vector>
+#include "Loader.h"
 
 int main(int argc, char* argv[])
 {
@@ -35,34 +35,18 @@ int main(int argc, char* argv[])
 	int frames = 0;
 	float timer = 0;
 
-	std::vector< Vertex > vertices =
-	{
-		{ math::Vector3( 0.0f,  0.5f, 1.0f), math::Vector2(0.5f, 0.0f) },
-		{ math::Vector3(-0.5f, -0.5f, 1.0f), math::Vector2(0.0f, 1.0f) },
-		{ math::Vector3( 0.5f, -0.5f, 1.0f), math::Vector2(1.0f, 1.0f) }
-	};
+	Loader loader;
+	VertexList *list = loader.ReadObjFile("../res/cube.obj");
 
-	std::vector< unsigned int > indices =
-	{
-		0, 1, 2
-	};
-
-	VertexList list(vertices, indices);
-
-	math::Vector3 p0(0.0f, 0.0f, 10.0f), p1(0.0f, 0.0f, 20.0f);
-	math::Matrix4 rot0 = math::RotationZ(math::Pi / 2.0f);
-	math::Matrix4 rot1 = math::RotationZ(-math::Pi / 2.0f);
-
+	math::Vector3 p(0.0f, 0.0f, 5.0f);
+	
 	float speed = 50.0f;
+	float yaw = 0.0f;
+	float pitch = 0.0f;
 
-	Texture brick("../res/brick.jpg"), container("../res/container.jpg");
+	Texture brick("../res/brick.jpg");
 
 	if (!brick.Load())
-	{
-		return -1;
-	}
-
-	if (!container.Load())
 	{
 		return -1;
 	}
@@ -94,7 +78,7 @@ int main(int argc, char* argv[])
 				}
 			}
 		}
-
+		
 		const Uint8* keyState = SDL_GetKeyboardState(nullptr);
 		
 		if (keyState[SDL_SCANCODE_ESCAPE])
@@ -102,35 +86,45 @@ int main(int argc, char* argv[])
 			running = false;
 		}
 
-		if (keyState[SDL_SCANCODE_UP])
-		{
-			p0 += math::Vector3(0.0f, 0.0f, 1.0f) * speed * deltaTime;
-		}
-
-		if (keyState[SDL_SCANCODE_DOWN])
-		{
-			p0 -= math::Vector3(0.0f, 0.0f, 1.0f) * speed * deltaTime;
-		}
-
 		if (keyState[SDL_SCANCODE_W])
 		{
-			p1 += math::Vector3(0.0f, 0.0f, 1.0f) * speed * deltaTime;
+			p += math::Vector3(0.0f, 0.0f, 1.0f) * speed * deltaTime;
 		}
 
 		if (keyState[SDL_SCANCODE_S])
 		{
-			p1 -= math::Vector3(0.0f, 0.0f, 1.0f) * speed * deltaTime;
+			p -= math::Vector3(0.0f, 0.0f, 1.0f) * speed * deltaTime;
 		}
-		
-		math::Matrix4 scale		  = math::Scale(math::Vector3(1000.0f, 1000.0f, 1.0f));
-		math::Matrix4 translation0 = math::Translation(p0);
-		math::Matrix4 translation1 = math::Translation(p1);
 
+		if (keyState[SDL_SCANCODE_UP])
+		{
+			pitch += deltaTime * speed;
+		}
+
+		if (keyState[SDL_SCANCODE_DOWN])
+		{
+			pitch -= deltaTime * speed;
+		}
+
+		if (keyState[SDL_SCANCODE_RIGHT])
+		{
+			yaw -= deltaTime * speed;
+		}
+
+		if (keyState[SDL_SCANCODE_LEFT])
+		{
+			yaw += deltaTime * speed;
+		}
+
+		math::Matrix4 rotation    = math::RotationX(math::ToRadians(pitch)) * 
+									math::RotationY(math::ToRadians(yaw));
+		math::Matrix4 scale		  = math::Scale(math::Vector3(1000.0f, 1000.0f, 1.0f));
+		math::Matrix4 translation = math::Translation(p);
+		
 		context.Begin();
 
-		context.RenderVertexList(list, brick, rot0 * scale * translation0);
-		context.RenderVertexList(list, container, rot1 * scale * translation1);
-
+		context.RenderVertexList(*list, &brick, rotation * scale * translation);
+		
 		context.End();
 	}
 

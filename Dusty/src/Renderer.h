@@ -57,7 +57,20 @@ namespace dusty
 			return v;
 		}
 
-		inline void SetPixel(const size_t& x, const size_t& y, const math::Vector3& color) const
+		inline math::Vector3 Transform(math::Vector3 v) const
+		{
+			float zInv = 1.0f / v.z;
+
+			v *= zInv;
+			v.z = zInv;
+
+			v.x = v.x + (m_Window->GetWidth() / 2.0f);
+			v.y = (m_Window->GetHeight() / 2.0f) - v.y;
+
+			return v;
+		}
+
+		inline void SetPixel(const int& x, const int& y, const math::Vector3& color) const
 		{
 			if (x < 0 || x >= m_Window->GetWidth() || y < 0 || y >= m_Window->GetHeight())
 			{
@@ -67,7 +80,7 @@ namespace dusty
 			m_Pixels[x + m_Screen->w * y] = GetIncodedColor(color);
 		}
 		
-		inline void SetPixel(const size_t& x, const size_t& y, const unsigned int& color) const
+		inline void SetPixel(const int& x, const int& y, const unsigned int& color) const
 		{
 			if (x < 0 || x >= m_Window->GetWidth() || y < 0 || y >= m_Window->GetHeight())
 			{
@@ -78,11 +91,12 @@ namespace dusty
 		}
 
 		void DrawLine(math::Vector2 v0, math::Vector2 v1, const math::Vector3& color) const;
-		
-		void RenderFlatBottomTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Texture& texture);
-		void RenderFlatTopTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2, const Texture& texture);
-		void RenderTriangle(Vertex v0, Vertex v1, Vertex v2, const Texture& texture);
-		void RenderVertexList(const VertexList& list, const Texture& texture, const math::Matrix4& mvp = math::Matrix4::Identity);
+		void DrawLine(const math::Vector3& v0, const math::Vector3& v1, const math::Vector3& color) const;
+
+		void RenderFlatBottomTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2, Texture* texture);
+		void RenderFlatTopTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2, Texture* texture);
+		void RenderTriangle(Vertex v0, Vertex v1, Vertex v2, Texture* texture);
+		void RenderVertexList(const VertexList& list, Texture* texture, const math::Matrix4& mvp = math::Matrix4::Identity);
 
 		inline void End() const
 		{

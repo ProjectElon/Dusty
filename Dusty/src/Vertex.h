@@ -11,6 +11,7 @@ namespace dusty
 	public:
 		math::Vector3 position;
 		math::Vector2 texCoord;
+		math::Vector3 normal;
 
 		inline Vertex operator+(const Vertex& other) const
 		{
@@ -18,7 +19,7 @@ namespace dusty
 			
 			result.position = position + other.position;
 			result.texCoord = texCoord + other.texCoord;
-
+			
 			return result;
 		}
 
@@ -28,7 +29,7 @@ namespace dusty
 			
 			result.position = position - other.position;
 			result.texCoord = texCoord - other.texCoord;
-
+			
 			return result;
 		}
 
@@ -46,6 +47,7 @@ namespace dusty
 		{
 			position *= scalar;
 			texCoord *= scalar;
+			
 			return *this;
 		}
 	};

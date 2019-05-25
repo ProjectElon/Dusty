@@ -16,7 +16,7 @@ namespace dusty
 		{
 			unsigned int size = m_Width * m_Height;
 			
-			for (int i = 0; i < size; i++)
+			for (unsigned int i = 0; i < size; i++)
 			{
 				m_Buffer[i] = std::numeric_limits< float >::infinity();
 			}

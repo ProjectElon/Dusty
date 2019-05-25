@@ -10,7 +10,6 @@
 
 namespace math
 {
-
 	class Vector2
 	{
 	public:

@@ -2,6 +2,8 @@
 #include "Window.h"
 #include "Vertex.h"
 
+#include <iostream>
+
 namespace dusty
 {
 	Renderer::Renderer(Window* window)
@@ -37,11 +39,11 @@ namespace dusty
 		int dy = static_cast< int > (round(v1.y - v0.y));
 
 		int error = 0;
-		int y = v0.y;
+		int y = static_cast< int >(round(v0.y));
 
-		int maxX = round(v1.x);
+		int maxX = static_cast< int >(round(v1.x));
 
-		for (int x = round(v0.x); x <= maxX; ++x)
+		for (int x = static_cast< int >(round(v0.x)); x <= maxX; ++x)
 		{
 			if (steep)
 			{
@@ -70,11 +72,18 @@ namespace dusty
 		}
 	}
 
+	void Renderer::DrawLine(const math::Vector3& v0, const math::Vector3& v1, const math::Vector3& color) const
+	{
+		math::Vector3 p0 = Transform(v0);
+		math::Vector3 p1 = Transform(v1);
+		DrawLine(p0.ToVector2(), p1.ToVector2(), color);
+	}
+
 	void Renderer::RenderFlatBottomTriangle(
 		const Vertex& v0, 
 		const Vertex& v1, 
 		const Vertex& v2, 
-		const Texture& texture)
+		Texture* texture)
 	{
 		float dy  = (v1.position.y - v0.position.y);
 		float dx0 = (v1.position.x - v0.position.x) / dy;
@@ -113,13 +122,8 @@ namespace dusty
 				}
 
 				p *= z;
-
-				unsigned int tx = static_cast< int >(p.texCoord.x * (texture.GetWidth()  - 1) + 0.5f);
-				unsigned int ty = static_cast< int >(p.texCoord.y * (texture.GetHeight() - 1) + 0.5f);
 				
-				SetPixel(x, y, texture.GetTexel(
-					std::min(tx, texture.GetWidth() - 1),
-					std::min(ty, texture.GetHeight() - 1)));
+				SetPixel(x, y, texture->GetTexel(p.texCoord));
 			}
 
 			x0 += dx0, x1 += dx1;
@@ -130,7 +134,7 @@ namespace dusty
 		const Vertex& v0, 
 		const Vertex& v1, 
 		const Vertex& v2, 
-		const Texture& texture)
+		Texture* texture)
 	{
 		float dy  = (v0.position.y - v1.position.y);
 		float dx0 = (v0.position.x - v1.position.x) / dy;
@@ -170,19 +174,14 @@ namespace dusty
 				
 				p *= z;
 
-				unsigned int tx = static_cast< int >(p.texCoord.x * (texture.GetWidth()  - 1) + 0.5f);
-				unsigned int ty = static_cast< int >(p.texCoord.y * (texture.GetHeight() - 1) + 0.5f);
-				
-				SetPixel(x, y, texture.GetTexel( 
-					std::min(tx, texture.GetWidth() - 1), 
-					std::min(ty, texture.GetHeight() - 1)));
+				SetPixel(x, y, texture->GetTexel(p.texCoord));
 			}
 
 			x0 += dx0, x1 += dx1;
 		}
 	}
 
-	void Renderer::RenderTriangle(Vertex v0, Vertex v1, Vertex v2, const Texture& texture)
+	void Renderer::RenderTriangle(Vertex v0, Vertex v1, Vertex v2, Texture* texture)
 	{
 		if (v2.position.y < v1.position.y)
 		{
@@ -240,24 +239,31 @@ namespace dusty
 		}
 	}
 
-	void Renderer::RenderVertexList(const VertexList& list, const Texture& texture, const math::Matrix4& mvp)
+	void Renderer::RenderVertexList(const VertexList& list, Texture *texture, const math::Matrix4& mvp)
 	{
 		const std::vector< Vertex >& vertices = list.GetVertices();
 		const std::vector< unsigned int >& indices = list.GetIndices();
 
 		for (unsigned int i = 0; i < indices.size(); i += 3)
 		{
-			Vertex v0 = vertices[indices[i + 0]];
-			Vertex v1 = vertices[indices[i + 1]];
-			Vertex v2 = vertices[indices[i + 2]];
-
+			Vertex v0 = vertices[ indices[i + 0] ];
+			Vertex v1 = vertices[ indices[i + 1] ];
+			Vertex v2 = vertices[ indices[i + 2] ];
+			
 			v0.position = v0.position * mvp;
 			v1.position = v1.position * mvp;
 			v2.position = v2.position * mvp;
+
+			math::Vector3 normal = math::Vector3::Cross(v1.position - v0.position, v2.position - v0.position);
 			
+			if (math::Vector3::Dot(v0.position, normal) >= 0.0f)
+			{
+				continue;
+			}
+
 			Transform(v0);
 			Transform(v1);
-			Transform(v2);
+			Transform(v2);			
 
 			RenderTriangle(v0, v1, v2, texture);
 		}
