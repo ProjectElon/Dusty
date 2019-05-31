@@ -4,6 +4,7 @@
 #include "math/Vector3.h"
 
 #include <string>
+#include <algorithm>
 #include <SDL/SDL.h>
 
 namespace dusty
@@ -25,10 +26,8 @@ namespace dusty
 			int y = static_cast< int >(coords.y * (GetHeight() - 1) + 0.5f);
 
 			// Texture wrapping
-			if (x >= GetWidth()) x = GetWidth() - 1;
-			if (y >= GetHeight()) y = GetHeight() - 1;
-			if (x < 0) x = 0;
-			if (y < 0) y = 0;
+			x = std::max(0, std::min(x, GetWidth() - 1));
+			y = std::max(0, std::min(y, GetHeight() - 1));
 
 			Uint8 r, g, b;
 			SDL_GetRGB(GetTexelLoc(x, y), m_Source->format, &r, &g, &b);

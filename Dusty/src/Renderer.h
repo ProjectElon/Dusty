@@ -13,6 +13,8 @@ namespace dusty
 {
 	class Vertex;
 	class VertexList;
+	class VertexShader;
+	class PixelShader;
 
 	class Renderer
 	{
@@ -44,28 +46,15 @@ namespace dusty
 			m_ClearColor = color;
 		}
 
-		inline Vertex& Transform(Vertex& v) const
+		inline Vertex& TransformToSceenSpace(Vertex& v) const
 		{
 			float zInv = 1.0f / v.position.z;
 
 			v *= zInv;
 			v.position.z = zInv;
 
-			v.position.x = v.position.x + (m_Window->GetWidth() / 2.0f);
-			v.position.y = (m_Window->GetHeight() / 2.0f) - v.position.y;
-
-			return v;
-		}
-
-		inline math::Vector3 Transform(math::Vector3 v) const
-		{
-			float zInv = 1.0f / v.z;
-
-			v *= zInv;
-			v.z = zInv;
-
-			v.x = v.x + (m_Window->GetWidth() / 2.0f);
-			v.y = (m_Window->GetHeight() / 2.0f) - v.y;
+			v.position.x =  v.position.x + (m_Window->GetWidth() / 2.0f);
+			v.position.y = -v.position.y + (m_Window->GetHeight() / 2.0f);
 
 			return v;
 		}
@@ -89,26 +78,25 @@ namespace dusty
 
 			m_Pixels[x + m_Screen->w * y] = color;
 		}
-
-		void DrawLine(math::Vector2 v0, math::Vector2 v1, const math::Vector3& color) const;
-		void DrawLine(const math::Vector3& v0, const math::Vector3& v1, const math::Vector3& color) const;
-
-		void RenderFlatBottomTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2, Texture* texture);
-		void RenderFlatTopTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2, Texture* texture);
-		void RenderTriangle(Vertex v0, Vertex v1, Vertex v2, Texture* texture);
-		void RenderVertexList(const VertexList& list, Texture* texture, const math::Matrix4& mvp = math::Matrix4::Identity);
+		
+		void RenderTriangle(Vertex v0, Vertex v1, Vertex v2, PixelShader* ps);
+		void RenderVertexList(const VertexList& list, VertexShader* vs, PixelShader* ps);
 
 		inline void End() const
 		{
 			SDL_UnlockSurface(m_Screen);
 			SDL_UpdateWindowSurface(m_Window->GetHandle());
 		}
-		
+
 	private:
 		class Window *m_Window;
 		SDL_Surface  *m_Screen;
 		math::Vector3 m_ClearColor;
 		Uint32		 *m_Pixels;
 		ZBuffer      *m_ZBuffer;
+
+		void DrawLine(math::Vector2 v0, math::Vector2 v1, const math::Vector3& color) const;
+		void RenderFlatBottomTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2, PixelShader* ps);
+		void RenderFlatTopTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2, PixelShader* ps);
 	};
 }

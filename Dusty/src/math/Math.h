@@ -48,26 +48,52 @@ namespace math
 		return rotation;
 	}
 
-	static Matrix4 Translation(const Vector3& T)
+	static Matrix4 Translation(const Vector3& t)
 	{
 		float translation[4][4] =
 		{
 			1.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, 1.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
-			T.x,  T.y,  T.z,  1.0f
+			t.x,  t.y,  t.z,  1.0f
 		};
 
 		return translation;
 	}
 
-	static Matrix4 Scale(const Vector3& S)
+	static Matrix4 Translation(float x, float y, float z)
+	{
+		float translation[4][4] =
+		{
+			1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			x,    y,    z,    1.0f
+		};
+
+		return translation;
+	}
+
+	static Matrix4 Scale(const Vector3& s)
 	{
 		float scale[4][4] =
 		{
-			S.x,  0.0f, 0.0f, 0.0f,
-			0.0f, S.y,  0.0f, 0.0f,
-			0.0f, 0.0f, S.z,  0.0f,
+			s.x,  0.0f, 0.0f, 0.0f,
+			0.0f, s.y,  0.0f, 0.0f,
+			0.0f, 0.0f, s.z,  0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f
+		};
+
+		return scale;
+	}
+
+	static Matrix4 Scale(float x, float y, float z)
+	{
+		float scale[4][4] =
+		{
+			x,    0.0f, 0.0f, 0.0f,
+			0.0f, y,    0.0f, 0.0f,
+			0.0f, 0.0f, z,    0.0f,
 			0.0f, 0.0f, 0.0f, 1.0f
 		};
 

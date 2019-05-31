@@ -10,44 +10,52 @@ namespace dusty
 	{
 	public:
 		math::Vector3 position;
+		math::Vector3 worldPos;
+
 		math::Vector2 texCoord;
 		math::Vector3 normal;
 
+		Vertex(const math::Vector3& p, const math::Vector2& t, const math::Vector3& n)
+			: position(p)
+			, worldPos(p)
+			, texCoord(t)
+			, normal(n)
+		{
+		}
+
 		inline Vertex operator+(const Vertex& other) const
 		{
-			Vertex result;
-			
-			result.position = position + other.position;
-			result.texCoord = texCoord + other.texCoord;
-			
-			return result;
+			return Vertex(
+				position + other.position,
+				texCoord + other.texCoord,
+				normal   + other.normal
+			);
 		}
 
 		inline Vertex operator-(const Vertex& other) const
 		{
-			Vertex result;
-			
-			result.position = position - other.position;
-			result.texCoord = texCoord - other.texCoord;
-			
-			return result;
+			return Vertex(
+				position - other.position,
+				texCoord - other.texCoord,
+				normal   - other.normal
+			);
 		}
 
 		inline Vertex operator*(const float& scalar)
 		{
-			Vertex result;
-			
-			result.position = position * scalar;
-			result.texCoord = texCoord * scalar;
-			
-			return result;
+			return Vertex(
+				position * scalar,
+				texCoord * scalar,
+				normal   * scalar
+			);
 		}
 
 		inline Vertex& operator*=(const float& scalar)
 		{
 			position *= scalar;
+			worldPos *= scalar;
 			texCoord *= scalar;
-			
+			normal   *= scalar;
 			return *this;
 		}
 	};

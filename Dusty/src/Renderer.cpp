@@ -1,6 +1,7 @@
 #include "Renderer.h"
 #include "Window.h"
-#include "Vertex.h"
+#include "VertexShader.h"
+#include "PixelShader.h"
 
 #include <iostream>
 
@@ -72,18 +73,11 @@ namespace dusty
 		}
 	}
 
-	void Renderer::DrawLine(const math::Vector3& v0, const math::Vector3& v1, const math::Vector3& color) const
-	{
-		math::Vector3 p0 = Transform(v0);
-		math::Vector3 p1 = Transform(v1);
-		DrawLine(p0.ToVector2(), p1.ToVector2(), color);
-	}
-
 	void Renderer::RenderFlatBottomTriangle(
 		const Vertex& v0, 
 		const Vertex& v1, 
 		const Vertex& v2, 
-		Texture* texture)
+		PixelShader* ps)
 	{
 		float dy  = (v1.position.y - v0.position.y);
 		float dx0 = (v1.position.x - v0.position.x) / dy;
@@ -101,17 +95,15 @@ namespace dusty
 			int xStart = static_cast< int >(ceil(x0));
 			int xEnd   = static_cast< int >(ceil(x1));
 
-			float cls0 = (y + 0.5f) - v0.position.y;
-
-			Vertex p0 = math::Lerp(v0, v1, cls0 / dy);
-			Vertex p1 = math::Lerp(v0, v2, cls0 / dy);
+			float alpha = ((y + 0.5f) - v0.position.y) / dy;
+			Vertex p0 = math::Lerp(v0, v1, alpha);
+			Vertex p1 = math::Lerp(v0, v2, alpha);
 
 			for (int x = xStart; x < xEnd; ++x)
 			{
-				float cls1 = (x + 0.5f) - p0.position.x;
 				float dx   = p1.position.x - p0.position.x;
-
-				Vertex p = math::Lerp(p0, p1, cls1 / dx);
+				float beta = ((x + 0.5f) - p0.position.x) / dx;
+				Vertex p = math::Lerp(p0, p1, beta);
 
 				float z = 1.0f / p.position.z;
 
@@ -122,8 +114,10 @@ namespace dusty
 				}
 
 				p *= z;
-				
-				SetPixel(x, y, texture->GetTexel(p.texCoord));
+
+				p.normal.Normalize();
+
+				SetPixel(x, y, ps->Execute(p));
 			}
 
 			x0 += dx0, x1 += dx1;
@@ -134,7 +128,7 @@ namespace dusty
 		const Vertex& v0, 
 		const Vertex& v1, 
 		const Vertex& v2, 
-		Texture* texture)
+		PixelShader* ps)
 	{
 		float dy  = (v0.position.y - v1.position.y);
 		float dx0 = (v0.position.x - v1.position.x) / dy;
@@ -152,17 +146,17 @@ namespace dusty
 			int xStart = static_cast< int >(ceil(x0));
 			int xEnd   = static_cast< int >(ceil(x1));
 
-			float cls0 = (y + 0.5f) - v1.position.y;
-			
-			Vertex p0 = math::Lerp(v1, v0, cls0 / dy);
-			Vertex p1 = math::Lerp(v2, v0, cls0 / dy);
+			float alpha = ((y + 0.5f) - v1.position.y) / dy;
+
+			Vertex p0 = math::Lerp(v1, v0, alpha);
+			Vertex p1 = math::Lerp(v2, v0, alpha);
 
 			for (int x = xStart; x < xEnd; ++x)
 			{
-				float cls1 = (x + 0.5f) - p0.position.x;
 				float dx   = p1.position.x - p0.position.x;
+				float beta = ((x + 0.5f) - p0.position.x) / dx;
 
-				Vertex p = math::Lerp(p0, p1, cls1 / dx);
+				Vertex p = math::Lerp(p0, p1, beta);
 				
 				float z = 1.0f / p.position.z;
 				
@@ -174,14 +168,14 @@ namespace dusty
 				
 				p *= z;
 
-				SetPixel(x, y, texture->GetTexel(p.texCoord));
+				SetPixel(x, y, ps->Execute(p));
 			}
 
 			x0 += dx0, x1 += dx1;
 		}
 	}
 
-	void Renderer::RenderTriangle(Vertex v0, Vertex v1, Vertex v2, Texture* texture)
+	void Renderer::RenderTriangle(Vertex v0, Vertex v1, Vertex v2, PixelShader* ps)
 	{
 		if (v2.position.y < v1.position.y)
 		{
@@ -216,11 +210,11 @@ namespace dusty
 
 		if (v0.position.y < v1.position.y && v0.position.y < v2.position.y && math::IsEqual(v1.position.y, v2.position.y))
 		{
-			RenderFlatBottomTriangle(v0, v1, v2, texture);
+			RenderFlatBottomTriangle(v0, v1, v2, ps);
 		}
 		else if (v2.position.y > v0.position.y && v2.position.y > v1.position.y && math::IsEqual(v0.position.y, v1.position.y))
 		{
-			RenderFlatTopTriangle(v2, v0, v1, texture);
+			RenderFlatTopTriangle(v2, v0, v1, ps);
 		}
 		else
 		{
@@ -234,38 +228,36 @@ namespace dusty
 				std::swap(v1, alphaSplit);
 			}
 
-			RenderFlatBottomTriangle(v0, v1, alphaSplit, texture);
-			RenderFlatTopTriangle(v2, v1, alphaSplit, texture);
+			RenderFlatBottomTriangle(v0, v1, alphaSplit, ps);
+			RenderFlatTopTriangle(v2, v1, alphaSplit, ps);
 		}
 	}
 
-	void Renderer::RenderVertexList(const VertexList& list, Texture *texture, const math::Matrix4& mvp)
+	void Renderer::RenderVertexList(const VertexList& list, VertexShader* vs, PixelShader* ps)
 	{
 		const std::vector< Vertex >& vertices = list.GetVertices();
 		const std::vector< unsigned int >& indices = list.GetIndices();
 
 		for (unsigned int i = 0; i < indices.size(); i += 3)
 		{
-			Vertex v0 = vertices[ indices[i + 0] ];
-			Vertex v1 = vertices[ indices[i + 1] ];
-			Vertex v2 = vertices[ indices[i + 2] ];
-			
-			v0.position = v0.position * mvp;
-			v1.position = v1.position * mvp;
-			v2.position = v2.position * mvp;
+			Vertex v0 = vs->Execute( vertices[indices[i + 0]] );
+			Vertex v1 = vs->Execute( vertices[indices[i + 1]] );
+			Vertex v2 = vs->Execute( vertices[indices[i + 2]] );
 
 			math::Vector3 normal = math::Vector3::Cross(v1.position - v0.position, v2.position - v0.position);
-			
-			if (math::Vector3::Dot(v0.position, normal) >= 0.0f)
+			math::Vector3 eye = math::Vector3::Zero;
+
+			// back face culling
+			if (math::Vector3::Dot(v0.position - eye, normal) >= 0.0f)
 			{
 				continue;
 			}
 
-			Transform(v0);
-			Transform(v1);
-			Transform(v2);			
+			TransformToSceenSpace(v0);
+			TransformToSceenSpace(v1);
+			TransformToSceenSpace(v2);
 
-			RenderTriangle(v0, v1, v2, texture);
+			RenderTriangle(v0, v1, v2, ps);
 		}
 	}
 

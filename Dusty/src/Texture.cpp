@@ -14,6 +14,7 @@ namespace dusty
 		if (m_Source)
 		{
 			SDL_FreeSurface(m_Source);
+			m_Source = nullptr;
 		}
 	}
 

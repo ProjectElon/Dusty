@@ -1,6 +1,7 @@
 #include "Window.h"
 #include "Renderer.h"
-#include "Vertex.h"
+#include "VertexShader.h"
+#include "PixelShader.h"
 #include "Loader.h"
 
 int main(int argc, char* argv[])
@@ -35,21 +36,19 @@ int main(int argc, char* argv[])
 	int frames = 0;
 	float timer = 0;
 
-	Loader loader;
-	VertexList *list = loader.ReadObjFile("../res/cube.obj");
+	VertexList *list = Loader::GetInstance()->ReadObjFile("../res/cube.obj");
+	Texture* brick = Loader::GetInstance()->LoadTexture("../res/brick.jpg");
 
 	math::Vector3 p(0.0f, 0.0f, 5.0f);
 	
 	float speed = 50.0f;
-	float yaw = 0.0f;
+	float yaw   = 0.0f;
 	float pitch = 0.0f;
 
-	Texture brick("../res/brick.jpg");
-
-	if (!brick.Load())
-	{
-		return -1;
-	}
+	// default Shaders
+	VS vs;
+	PS ps;
+	ps.BindTexture(brick);
 
 	while (running)
 	{
@@ -116,18 +115,18 @@ int main(int argc, char* argv[])
 			yaw += deltaTime * speed;
 		}
 
-		math::Matrix4 rotation    = math::RotationX(math::ToRadians(pitch)) * 
-									math::RotationY(math::ToRadians(yaw));
-		math::Matrix4 scale		  = math::Scale(math::Vector3(1000.0f, 1000.0f, 1.0f));
-		math::Matrix4 translation = math::Translation(p);
-		
+		vs.SetScale(math::Scale(math::Vector3(800.0f, 800.0f, 1.0f)));
+		vs.SetRotation(math::RotationX(math::ToRadians(pitch)) * math::RotationY(math::ToRadians(yaw)));
+		vs.SetTranslation(math::Translation(p));
+
 		context.Begin();
 
-		context.RenderVertexList(*list, &brick, rotation * scale * translation);
+		context.RenderVertexList(*list, &vs, &ps);
 		
 		context.End();
 	}
 
+	delete Loader::GetInstance();
 	SDL_Quit();
 
 	return 0;

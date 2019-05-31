@@ -154,6 +154,7 @@
     <ClCompile Include="src\math\Vector3.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\Utility.cpp" />
     <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\ZBuffer.cpp" />
   </ItemGroup>
@@ -165,9 +166,12 @@
     <ClInclude Include="src\math\Matrix4.h" />
     <ClInclude Include="src\math\Vector2.h" />
     <ClInclude Include="src\math\Vector3.h" />
+    <ClInclude Include="src\PixelShader.h" />
     <ClInclude Include="src\Renderer.h" />
     <ClInclude Include="src\Texture.h" />
+    <ClInclude Include="src\Utility.h" />
     <ClInclude Include="src\Vertex.h" />
+    <ClInclude Include="src\VertexShader.h" />
     <ClInclude Include="src\Window.h" />
     <ClInclude Include="src\ZBuffer.h" />
   </ItemGroup>

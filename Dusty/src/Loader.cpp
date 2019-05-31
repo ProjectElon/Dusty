@@ -8,9 +8,7 @@
 
 namespace dusty
 {
-	Loader::Loader()
-	{
-	}
+	Loader* Loader::s_Instance = nullptr;
 
 	Loader::~Loader()
 	{
@@ -97,12 +95,8 @@ namespace dusty
 					
 					if (it == index.end())
 					{
-						Vertex vertex;
+						Vertex vertex(positions[p], texCoords[t], normals[n]);
 						
-						vertex.position = positions[p];
-						vertex.texCoord = texCoords[t];
-						vertex.normal   = normals[n];
-
 						vertices.push_back(vertex);
 						indices.push_back(vertices.size() - 1);
 						index.emplace(target, vertices.size() - 1);
@@ -123,19 +117,24 @@ namespace dusty
 		return list;
 	}
 
-
-	std::vector< std::string > Loader::Split(const std::string& line, char delimiter) const
+	Texture* Loader::LoadTexture(const std::string& path)
 	{
-		std::vector< std::string > tokens;
-		std::string token;
-		
-		std::istringstream iss(line);
-		
-		while (std::getline(iss, token, delimiter))
+		auto it = m_Textures.find(path);
+
+		if (it != m_Textures.end())
 		{
-			tokens.push_back(token);
+			return it->second;
 		}
 
-		return tokens;
+		Texture* texture = new Texture(path);
+		
+		if (!texture->Load())
+		{
+			return nullptr;
+		}
+
+		m_Textures.emplace(path, texture);
+
+		return texture;
 	}
 }
