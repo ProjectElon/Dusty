@@ -46,7 +46,7 @@ namespace dusty
 		{
 			math::Vector3 base = GetTexture(0)->GetTexel(vertex.texCoord);
 
-			math::Vector3 ambient = math::Vector3::Hadamard(base, lightColor) * 0.3f;
+			math::Vector3 ambient = math::Vector3::Hadamard(base, lightColor) * 0.1f;
 			
 			float intensity = std::max(-math::Vector3::Dot(lightDir, vertex.normal), 0.0f);
 			math::Vector3 diffuse = math::Vector3::Hadamard(base, lightColor) * intensity;
@@ -62,7 +62,7 @@ namespace dusty
 		}
 
 	private:
-		math::Vector3 lightDir   = math::Vector3(0.0f, 0.0f, 1.0f);
-		math::Vector3 lightColor = math::Vector3(1.0f, 1.0f, 1.0f);
+		math::Vector3 lightDir      = math::Vector3(-1.0f, 1.0f, 0.0f);
+		math::Vector3 lightColor    = math::Vector3(1.0f, 1.0f, 1.0f);
 	};
 }

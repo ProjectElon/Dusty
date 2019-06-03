@@ -86,6 +86,8 @@ namespace dusty
 
 			math::Vector3 normal = math::Vector3::Cross(v1.worldPos - v0.worldPos, v2.worldPos - v0.worldPos);
 			math::Vector3 eye = math::Vector3::Zero;
+			
+			// back face culling
 
 			if (math::Vector3::Dot(v0.worldPos - eye, normal) >= 0.0f)
 			{
@@ -96,7 +98,7 @@ namespace dusty
 			{
 				continue;
 			}
-
+			
 			if (v0.position.z < 0.0f)
 			{
 				if (v1.position.z < 0.0f)
@@ -290,6 +292,7 @@ namespace dusty
 			int xEnd   = std::min(static_cast< int >(ceil(x1)), m_Screen->w - 1);
 
 			float alpha = ((y + 0.5f) - v0.position.y) / dy;
+			
 			Vertex p0 = math::Lerp(v0, v1, alpha);
 			Vertex p1 = math::Lerp(v0, v2, alpha);
 

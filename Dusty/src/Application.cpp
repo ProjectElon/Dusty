@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	Window window("Dusty", 800, 600);
+	Window window("Dusty", 640, 480);
 
 	if (!window.Init())
 	{
@@ -36,25 +36,25 @@ int main(int argc, char* argv[])
 	int frames = 0;
 	float timer = 0;
 
-	VertexList *list = Loader::GetInstance()->ReadObjFile("../res/cube.obj");
-	Texture* brick   = Loader::GetInstance()->LoadTexture("../res/brick.jpg");
+	VertexList* list = Loader::GetInstance()->ReadObjFile("../res/models/monkey.obj");
+	Texture* texture = Loader::GetInstance()->LoadTexture("../res/textures/metal.jpg");
 
-	math::Vector3 p(0.0f, 0.0f, 0.0f);
+	math::Vector3 p(0.0f, 0.0f, 5.0f);
 	
 	float speed = 5.0f;
 	float rotSpeed = 50.0f;
-	float yaw   = 0.0f;
+	float yaw = 180.0f;
 	float pitch = 0.0f;
 
 	// default Shaders
-	VS vs;
-	PS ps;
-	ps.BindTexture(brick);
+	VS vertexShader;
+	PS pixelShader;
+	pixelShader.BindTexture(texture);
 
-	float fov = 90.0f;
+	float fov = 100.0f;
 	float aspectRatio = (float)window.GetWidth() / (float)window.GetHeight();
-	vs.SetProjection(math::Projection(math::ToRadians(fov), aspectRatio, 1.0f, 100.0f));
-	vs.SetScale(math::Scale(math::Vector3(2.0f, 2.0f, 2.0f)));
+	vertexShader.SetProjection(math::Projection(math::ToRadians(fov), aspectRatio, 1.0f, 100.0f));
+	vertexShader.SetScale(math::Scale(math::Vector3(2.0f, 2.0f, 2.0f)));
 
 	while (running)
 	{
@@ -141,11 +141,17 @@ int main(int argc, char* argv[])
 			yaw += deltaTime * rotSpeed;
 		}
 
-		vs.SetRotation(math::RotationX(math::ToRadians(pitch)) * math::RotationY(math::ToRadians(yaw)));
-		vs.SetTranslation(math::Translation(p));
+		if (yaw > 360.0f) yaw -= 360.0f;
+		if (yaw < 0.0) yaw += 360.0f;
+
+		if (pitch > 360.0f) pitch -= 360.0f;
+		if (pitch < 0.0) pitch += 360.0f;
+
+		vertexShader.SetRotation(math::RotationX(math::ToRadians(pitch)) * math::RotationY(math::ToRadians(yaw)));
+		vertexShader.SetTranslation(math::Translation(p));
 
 		context.Begin();
-		context.RenderVertexList(*list, &vs, &ps);
+		context.RenderVertexList(*list, &vertexShader, &pixelShader);
 		context.End();
 	}
 

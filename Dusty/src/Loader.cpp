@@ -82,7 +82,9 @@ namespace dusty
 			}
 			else if (mark == "f")
 			{
-				for (int i = 1; i < 4; i++)
+				std::vector< unsigned int > indexHolder;
+
+				for (int i = 1; i < tokens.size(); i++)
 				{
 					auto vertex = Split(tokens[i], '/');
 
@@ -102,13 +104,24 @@ namespace dusty
 						vertex.normal   = normals[n];
 						
 						vertices.push_back(vertex);
-						indices.push_back(vertices.size() - 1);
+						indexHolder.push_back(vertices.size() - 1);
 						index.emplace(target, vertices.size() - 1);
 					}
 					else
 					{
-						indices.push_back(it->second);
+						indexHolder.push_back(it->second);
 					}
+				}
+
+				indices.push_back(indexHolder[0]);
+				indices.push_back(indexHolder[1]);
+				indices.push_back(indexHolder[2]);
+
+				if (indexHolder.size() == 4)
+				{
+					indices.push_back(indexHolder[0]);
+					indices.push_back(indexHolder[2]);
+					indices.push_back(indexHolder[3]);
 				}
 			}
 		}
