@@ -46,17 +46,14 @@ namespace dusty
 			m_ClearColor = color;
 		}
 
-		inline Vertex& TransformToSceenSpace(Vertex& v) const
+		inline void TransformToSceenSpace(Vertex& v) const
 		{
-			float zInv = 1.0f / v.position.z;
+			float wInv = 1.0f / v.position.w;
+			v *= wInv;
+			v.position.w = wInv;
 
-			v *= zInv;
-			v.position.z = zInv;
-
-			v.position.x =  v.position.x + (m_Window->GetWidth() / 2.0f);
-			v.position.y = -v.position.y + (m_Window->GetHeight() / 2.0f);
-
-			return v;
+			v.position.x = (v.position.x + 1.0) * (m_Window->GetWidth() / 2.0f);
+			v.position.y = (-v.position.y + 1.0) * (m_Window->GetHeight() / 2.0f);
 		}
 
 		inline void SetPixel(const int& x, const int& y, const math::Vector3& color) const
@@ -95,6 +92,12 @@ namespace dusty
 		Uint32		 *m_Pixels;
 		ZBuffer      *m_ZBuffer;
 
+		// clipping 
+		bool IsOutSideViewFrustum(const Vertex& v0, const Vertex& v1, const Vertex& v2) const;
+		void Clip1(const Vertex& v0, const Vertex& v1, const Vertex& v2, PixelShader* ps);
+		void Clip2(const Vertex& v0, const Vertex& v1, const Vertex& v2, PixelShader* ps);
+
+		// rendering
 		void DrawLine(math::Vector2 v0, math::Vector2 v1, const math::Vector3& color) const;
 		void RenderFlatBottomTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2, PixelShader* ps);
 		void RenderFlatTopTriangle(const Vertex& v0, const Vertex& v1, const Vertex& v2, PixelShader* ps);

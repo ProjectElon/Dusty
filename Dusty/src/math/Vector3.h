@@ -20,7 +20,8 @@ namespace math
 		float z;
 
 		Vector3();
-		explicit Vector3(const float& newX, const float& newY, const float& newZ);
+		Vector3(const float& newX, const float& newY, const float& newZ);
+		Vector3(const math::Vector2& v, const float& newZ);
 		Vector3(const Vector3& vector);
 
 		~Vector3() = default;
@@ -173,8 +174,6 @@ namespace math
 				lhs.z * rhs.z
 			);
 		}
-
-		Vector2 ToVector2() const;
 
 		std::string ToString() const
 		{

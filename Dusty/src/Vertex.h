@@ -9,45 +9,65 @@ namespace dusty
 	class Vertex
 	{
 	public:
-		math::Vector3 position;
+		math::Vector4 position;
 		math::Vector3 worldPos;
-
 		math::Vector2 texCoord;
 		math::Vector3 normal;
 
-		Vertex(const math::Vector3& p, const math::Vector2& t, const math::Vector3& n)
-			: position(p)
-			, worldPos(p)
-			, texCoord(t)
-			, normal(n)
+		Vertex()
+		{}
+
+		Vertex(const Vertex& other)
 		{
+			position = other.position;
+			worldPos = other.worldPos;
+			texCoord = other.texCoord;
+			normal   = other.normal;
+		}
+
+		Vertex& operator=(const Vertex& other)
+		{
+			position = other.position;
+			worldPos = other.worldPos;
+			texCoord = other.texCoord;
+			normal   = other.normal;
+			return *this;
 		}
 
 		inline Vertex operator+(const Vertex& other) const
 		{
-			return Vertex(
-				position + other.position,
-				texCoord + other.texCoord,
-				normal   + other.normal
-			);
+			Vertex result;
+
+			result.position = position + other.position;
+			result.worldPos = worldPos + other.worldPos;
+			result.texCoord = texCoord + other.texCoord;
+			result.normal   = normal   + other.normal;
+
+			return result;
 		}
 
 		inline Vertex operator-(const Vertex& other) const
 		{
-			return Vertex(
-				position - other.position,
-				texCoord - other.texCoord,
-				normal   - other.normal
-			);
+			Vertex result;
+
+			result.position = position - other.position;
+			result.worldPos = worldPos - other.worldPos;
+			result.texCoord = texCoord - other.texCoord;
+			result.normal   = normal   - other.normal;
+
+			return result;
 		}
 
 		inline Vertex operator*(const float& scalar)
 		{
-			return Vertex(
-				position * scalar,
-				texCoord * scalar,
-				normal   * scalar
-			);
+			Vertex result;
+
+			result.position = position * scalar;
+			result.worldPos = worldPos * scalar;
+			result.texCoord = texCoord * scalar;
+			result.normal   = normal   * scalar;
+
+			return result;
 		}
 
 		inline Vertex& operator*=(const float& scalar)

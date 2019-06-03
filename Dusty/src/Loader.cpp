@@ -95,7 +95,11 @@ namespace dusty
 					
 					if (it == index.end())
 					{
-						Vertex vertex(positions[p], texCoords[t], normals[n]);
+						Vertex vertex; 
+
+						vertex.worldPos = positions[p];
+						vertex.texCoord = texCoords[t]; 
+						vertex.normal   = normals[n];
 						
 						vertices.push_back(vertex);
 						indices.push_back(vertices.size() - 1);
@@ -108,6 +112,8 @@ namespace dusty
 				}
 			}
 		}
+
+		std::cout << "Mesh : " << path << " Loaded Successfully" << std::endl;
 
 		VertexList* list = new VertexList(vertices, indices);
 		m_Meshs.emplace(path, list);
@@ -130,8 +136,11 @@ namespace dusty
 		
 		if (!texture->Load())
 		{
+			std::cout << "Unable To Load Texture : " << path << std::endl;
 			return nullptr;
 		}
+
+		std::cout << "Texture : " << path << " Loaded Successfully" << std::endl;
 
 		m_Textures.emplace(path, texture);
 

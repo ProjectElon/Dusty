@@ -3,6 +3,7 @@
 #include "Functions.h"
 #include "Vector2.h"
 #include "Vector3.h"
+#include "Vector4.h"
 #include "Matrix3.h"
 #include "Matrix4.h"
 
@@ -148,6 +149,22 @@ namespace math
 		return rotationZ;
 	}
 
+	static Matrix4 Projection(float fov, float aspectRatio, float near, float far)
+	{
+		const float width = 1.0f / std::tan(fov / 2.0f);
+		const float height  = width * aspectRatio;
+
+		float projection[4][4] =
+		{
+			width, 0.0f,   0.0f,                         0.0f,
+			0.0f,  height, 0.0f,                         0.0f,
+			0.0f,  0.0f,   far / (far - near),           1.0f,
+			0.0f,  0.0f,   -near * far / (far - near),   0.0f
+		};
+
+		return projection;
+	}
+
 	static Vector2 Transform(const Vector2& vec, const Matrix3& mat, float z = 1.0f)
 	{
 		Vector2 result;
@@ -174,12 +191,36 @@ namespace math
 		return result;
 	}
 
+	static Vector4 Transform(const Vector4& vec, const Matrix4& mat)
+	{
+		Vector4 result;
+
+		result.x = vec.x * mat.elements[0][0] + vec.y * mat.elements[1][0]
+			+ vec.z * mat.elements[2][0] + vec.w * mat.elements[3][0];
+
+		result.y = vec.x * mat.elements[0][1] + vec.y * mat.elements[1][1]
+			+ vec.z * mat.elements[2][1] + vec.w * mat.elements[3][1];
+
+		result.z = vec.x * mat.elements[0][2] + vec.y * mat.elements[1][2]
+			+ vec.z * mat.elements[2][2] + vec.w * mat.elements[3][2];
+
+		result.w = vec.x * mat.elements[0][3] + vec.y * mat.elements[1][3]
+			+ vec.z * mat.elements[2][3] + vec.w * mat.elements[3][3];
+
+		return result;
+	}
+
 	static inline Vector2 operator*(const Vector2& vec, const Matrix3& mat)
 	{
 		return Transform(vec, mat);
 	}
 
 	static inline Vector3 operator*(const Vector3& vec, const Matrix4& mat)
+	{
+		return Transform(vec, mat);
+	}
+
+	static inline Vector4 operator*(const Vector4& vec, const Matrix4& mat)
 	{
 		return Transform(vec, mat);
 	}

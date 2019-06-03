@@ -13,7 +13,7 @@ namespace dusty
 		{
 		}
 
-		virtual Vertex Execute(const Vertex& vertex) = 0;
+		virtual Vertex Execute(Vertex v) = 0;
 
 		void SetScale(const math::Matrix4& scale)
 		{
@@ -30,10 +30,16 @@ namespace dusty
 			m_Translation = translation;
 		}
 
+		void SetProjection(const math::Matrix4& projection)
+		{
+			m_Projection = projection;
+		}
+
 	protected:
 		math::Matrix4 m_Scale;
 		math::Matrix4 m_Rotation;
 		math::Matrix4 m_Translation;
+		math::Matrix4 m_Projection;
 	};
 
 	class VS : public VertexShader
@@ -47,12 +53,12 @@ namespace dusty
 		{
 		}
 
-		Vertex Execute(const Vertex& vertex) override
+		Vertex Execute(Vertex v) override
 		{
-			Vertex v = vertex;
-			
-			v.position = v.position * m_Rotation * m_Scale * m_Translation;
-			v.worldPos = v.position;
+			math::Matrix4 model = m_Scale * m_Rotation * m_Translation;
+
+			v.worldPos = v.worldPos * model;
+			v.position = math::Vector4(v.worldPos, 1.0f) * m_Projection;
 			v.normal   = v.normal * m_Rotation;
 
 			return v;

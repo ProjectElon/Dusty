@@ -25,11 +25,8 @@ namespace dusty
 		
 		if (m_Source == nullptr)
 		{
-			SDL_Log("Unable To Load Texture : %s\n", path);
 			return false;
 		}
-
-		SDL_Log("Texture : %s Loaded Successfully\n", path);
 
 		return true;
 	}

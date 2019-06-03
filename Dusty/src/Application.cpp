@@ -37,11 +37,12 @@ int main(int argc, char* argv[])
 	float timer = 0;
 
 	VertexList *list = Loader::GetInstance()->ReadObjFile("../res/cube.obj");
-	Texture* brick = Loader::GetInstance()->LoadTexture("../res/brick.jpg");
+	Texture* brick   = Loader::GetInstance()->LoadTexture("../res/brick.jpg");
 
-	math::Vector3 p(0.0f, 0.0f, 5.0f);
+	math::Vector3 p(0.0f, 0.0f, 0.0f);
 	
-	float speed = 50.0f;
+	float speed = 5.0f;
+	float rotSpeed = 50.0f;
 	float yaw   = 0.0f;
 	float pitch = 0.0f;
 
@@ -49,6 +50,11 @@ int main(int argc, char* argv[])
 	VS vs;
 	PS ps;
 	ps.BindTexture(brick);
+
+	float fov = 90.0f;
+	float aspectRatio = (float)window.GetWidth() / (float)window.GetHeight();
+	vs.SetProjection(math::Projection(math::ToRadians(fov), aspectRatio, 1.0f, 100.0f));
+	vs.SetScale(math::Scale(math::Vector3(2.0f, 2.0f, 2.0f)));
 
 	while (running)
 	{
@@ -87,42 +93,59 @@ int main(int argc, char* argv[])
 
 		if (keyState[SDL_SCANCODE_W])
 		{
-			p += math::Vector3(0.0f, 0.0f, 1.0f) * speed * deltaTime;
+			p += math::Vector3::UnitZ * speed * deltaTime;
 		}
 
 		if (keyState[SDL_SCANCODE_S])
 		{
-			p -= math::Vector3(0.0f, 0.0f, 1.0f) * speed * deltaTime;
+			p -= math::Vector3::UnitZ * speed * deltaTime;
+		}
+
+		if (keyState[SDL_SCANCODE_A])
+		{
+			p -= math::Vector3::UnitX * speed * deltaTime;
+		}
+
+		if (keyState[SDL_SCANCODE_D])
+		{
+			p += math::Vector3::UnitX * speed * deltaTime;
+		}
+
+		if (keyState[SDL_SCANCODE_SPACE])
+		{
+			p += math::Vector3::UnitY * speed * deltaTime;
+		}
+
+		if (keyState[SDL_SCANCODE_LSHIFT])
+		{
+			p -= math::Vector3::UnitY * speed * deltaTime;
 		}
 
 		if (keyState[SDL_SCANCODE_UP])
 		{
-			pitch += deltaTime * speed;
+			pitch += deltaTime * rotSpeed;
 		}
 
 		if (keyState[SDL_SCANCODE_DOWN])
 		{
-			pitch -= deltaTime * speed;
+			pitch -= deltaTime * rotSpeed;
 		}
 
 		if (keyState[SDL_SCANCODE_RIGHT])
 		{
-			yaw -= deltaTime * speed;
+			yaw -= deltaTime * rotSpeed;
 		}
 
 		if (keyState[SDL_SCANCODE_LEFT])
 		{
-			yaw += deltaTime * speed;
+			yaw += deltaTime * rotSpeed;
 		}
 
-		vs.SetScale(math::Scale(math::Vector3(800.0f, 800.0f, 1.0f)));
 		vs.SetRotation(math::RotationX(math::ToRadians(pitch)) * math::RotationY(math::ToRadians(yaw)));
 		vs.SetTranslation(math::Translation(p));
 
 		context.Begin();
-
 		context.RenderVertexList(*list, &vs, &ps);
-		
 		context.End();
 	}
 

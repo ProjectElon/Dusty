@@ -17,7 +17,7 @@ namespace math
 		float y;
 
 		Vector2();
-		explicit Vector2(const float& newX, const float& newY);
+		Vector2(const float& newX, const float& newY);
 		Vector2(const Vector2& vector);
 		~Vector2() = default;
 
