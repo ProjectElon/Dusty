@@ -141,11 +141,25 @@ int main(int argc, char* argv[])
 			yaw += deltaTime * rotSpeed;
 		}
 
-		if (yaw > 360.0f) yaw -= 360.0f;
-		if (yaw < 0.0) yaw += 360.0f;
+		if (yaw > 360.0f)
+		{
+			yaw -= 360.0f;
+		}
 
-		if (pitch > 360.0f) pitch -= 360.0f;
-		if (pitch < 0.0) pitch += 360.0f;
+		if (yaw < 0.0)
+		{
+			yaw += 360.0f;
+		}
+
+		if (pitch > 360.0f) 
+		{ 
+			pitch -= 360.0f; 
+		}
+
+		if (pitch < 0.0)
+		{ 
+			pitch += 360.0f; 
+		}
 
 		vertexShader.SetRotation(math::RotationX(math::ToRadians(pitch)) * math::RotationY(math::ToRadians(yaw)));
 		vertexShader.SetTranslation(math::Translation(p));
@@ -155,8 +169,9 @@ int main(int argc, char* argv[])
 		context.End();
 	}
 
-	delete Loader::GetInstance();
 	SDL_Quit();
+
+	delete Loader::GetInstance();
 
 	return 0;
 }

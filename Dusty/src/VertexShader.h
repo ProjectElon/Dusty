@@ -13,7 +13,7 @@ namespace dusty
 		{
 		}
 
-		virtual Vertex Execute(Vertex v) = 0;
+		virtual Vertex Execute(Vertex v) const = 0;
 
 		void SetScale(const math::Matrix4& scale)
 		{
@@ -53,7 +53,7 @@ namespace dusty
 		{
 		}
 
-		Vertex Execute(Vertex v) override
+		Vertex Execute(Vertex v) const override
 		{
 			math::Matrix4 model = m_Scale * m_Rotation * m_Translation;
 

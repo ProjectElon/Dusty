@@ -13,20 +13,20 @@ namespace dusty
 
 		bool Init();
 		
-		inline SDL_Window*         GetHandle()  const { return mHandle; }
-		inline const std::string&  GetTitle()  const { return mTitle;  }
-		inline const size_t&       GetWidth()  const { return mWidth;  }
-		inline const size_t&       GetHeight() const { return mHeight; }
+		inline SDL_Window*         GetHandle() const { return m_Handle; }
+		inline const std::string&  GetTitle()  const { return m_Title;  }
+		inline const size_t&       GetWidth()  const { return m_Width;  }
+		inline const size_t&       GetHeight() const { return m_Height; }
 		
 		inline SDL_Surface* GetSurface() const
 		{ 
-			return SDL_GetWindowSurface(mHandle);
+			return SDL_GetWindowSurface(m_Handle);
 		}
 
 	private:
-		std::string mTitle;
-		size_t      mWidth;
-		size_t      mHeight;
-		SDL_Window *mHandle;
+		std::string m_Title;
+		size_t      m_Width;
+		size_t      m_Height;
+		SDL_Window *m_Handle;
 	};
 }

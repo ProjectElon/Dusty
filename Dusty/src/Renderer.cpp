@@ -303,7 +303,7 @@ namespace dusty
 				Vertex p = math::Lerp(p0, p1, beta);
 
 				// depth testing
-				if (!m_ZBuffer->test(x, y, p.position.z))
+				if (!m_ZBuffer->Test(x, y, p.position.z))
 				{
 					continue;
 				}
@@ -355,7 +355,7 @@ namespace dusty
 				Vertex p = math::Lerp(p0, p1, beta);
 				
 				// depth testing
-				if (!m_ZBuffer->test(x, y, p.position.z))
+				if (!m_ZBuffer->Test(x, y, p.position.z))
 				{
 					continue;
 				}

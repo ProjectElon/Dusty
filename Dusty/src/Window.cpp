@@ -3,34 +3,34 @@
 namespace dusty
 {
 	Window::Window(const std::string& title, const size_t& width, const size_t& height)
-		: mTitle(title)
-		, mWidth(width)
-		, mHeight(height)
-		, mHandle(nullptr)
+		: m_Title(title)
+		, m_Width(width)
+		, m_Height(height)
+		, m_Handle(nullptr)
 	{}
 
 	Window::~Window()
 	{
-		if (mHandle != nullptr)
+		if (m_Handle != nullptr)
 		{
-			SDL_DestroyWindow(mHandle);
+			SDL_DestroyWindow(m_Handle);
 		}
 	}
 
 	bool Window::Init()
 	{
-		const char* title = mTitle.c_str();
+		const char* title = m_Title.c_str();
 
-		mHandle = SDL_CreateWindow(
+		m_Handle = SDL_CreateWindow(
 			title,
 			SDL_WINDOWPOS_CENTERED,
 			SDL_WINDOWPOS_CENTERED,
-			mWidth,
-			mHeight,
+			m_Width,
+			m_Height,
 			SDL_WINDOW_SHOWN
 		);
 
-		if (!mHandle)
+		if (!m_Handle)
 		{
 			return false;
 		}

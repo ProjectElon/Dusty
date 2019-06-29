@@ -14,14 +14,14 @@ namespace dusty
 		{
 		}
 
-		virtual math::Vector3 Execute(const Vertex& vertex) = 0;
+		virtual math::Vector3 Execute(const Vertex& vertex) const = 0;
 		
 		inline void BindTexture(Texture* texture)
 		{
 			m_Textures.push_back(texture);
 		}
 
-		inline Texture* GetTexture(int slot)
+		inline Texture* GetTexture(int slot) const
 		{
 			return m_Textures[slot];
 		}
@@ -42,14 +42,14 @@ namespace dusty
 			* the givin vertex data corresponds to the pixel data itself 
 			* you can use the world position and the normal to do any calculations
 		*/
-		math::Vector3 Execute(const Vertex& vertex) override
+		math::Vector3 Execute(const Vertex& vertex) const override
 		{
-			math::Vector3 base = GetTexture(0)->GetTexel(vertex.texCoord);
+			math::Vector3 baseColor = GetTexture(0)->GetTexel(vertex.texCoord);
 
-			math::Vector3 ambient = math::Vector3::Hadamard(base, lightColor) * 0.1f;
+			math::Vector3 ambient = math::Vector3::Hadamard(baseColor, m_LightColor) * 0.1f;
 			
-			float intensity = std::max(-math::Vector3::Dot(lightDir, vertex.normal), 0.0f);
-			math::Vector3 diffuse = math::Vector3::Hadamard(base, lightColor) * intensity;
+			float intensity = std::max(-math::Vector3::Dot(m_LightDir, vertex.normal), 0.0f);
+			math::Vector3 diffuse = math::Vector3::Hadamard(baseColor, m_LightColor) * intensity;
 			
 			math::Vector3 color = ambient + diffuse;
 			
@@ -62,7 +62,7 @@ namespace dusty
 		}
 
 	private:
-		math::Vector3 lightDir      = math::Vector3(-1.0f, 1.0f, 0.0f);
-		math::Vector3 lightColor    = math::Vector3(1.0f, 1.0f, 1.0f);
+		math::Vector3 m_LightDir   = math::Vector3(-1.0f, 1.0f, 0.0f);
+		math::Vector3 m_LightColor = math::Vector3(1.0f, 1.0f, 1.0f);
 	};
 }

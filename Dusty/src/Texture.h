@@ -32,6 +32,7 @@ namespace dusty
 			Uint8 r, g, b;
 			SDL_GetRGB(GetTexelLoc(x, y), m_Source->format, &r, &g, &b);
 			float inv = 1.0f / 255.0f;
+
 			return math::Vector3(r * inv, g * inv, b * inv);
 		}
 
@@ -39,7 +40,7 @@ namespace dusty
 		std::string	 m_Path;
 		SDL_Surface *m_Source;
 		
-		Uint32 GetTexelLoc(int x, int y)
+		Uint32 GetTexelLoc(int x, int y) const
 		{
 			// note: that i didn't write this code because SDL is a pain in the butt
 			int bpp = m_Source->format->BytesPerPixel;

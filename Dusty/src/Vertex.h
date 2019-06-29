@@ -15,7 +15,8 @@ namespace dusty
 		math::Vector3 normal;
 
 		Vertex()
-		{}
+		{
+		}
 
 		Vertex(const Vertex& other)
 		{
@@ -82,10 +83,6 @@ namespace dusty
 
 	class VertexList
 	{
-	private:
-		std::vector< Vertex > m_Vertices;
-		std::vector< unsigned int > m_Indices;
-
 	public:
 		VertexList(
 			const std::vector<Vertex>& vertices, 
@@ -105,5 +102,9 @@ namespace dusty
 		{
 			return m_Indices;
 		}
+
+	private:
+		std::vector< Vertex >       m_Vertices;
+		std::vector< unsigned int > m_Indices;
 	};
 }

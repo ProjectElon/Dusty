@@ -10,7 +10,7 @@ namespace dusty
 		ZBuffer(const unsigned int& width, const unsigned int& height);
 		~ZBuffer();
 
-		bool test(int x, int y, float depth);
+		bool Test(int x, int y, float depth);
 
 		inline void Clear()
 		{
@@ -36,7 +36,7 @@ namespace dusty
 		const unsigned int& GetHeight() const { return m_Height; }
 
 	private:
-		float* m_Buffer;
+		float*       m_Buffer;
 		unsigned int m_Width;
 		unsigned int m_Height;
 	};

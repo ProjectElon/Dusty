@@ -33,6 +33,6 @@ namespace dusty
 		static Loader* s_Instance;
 
 		std::unordered_map< std::string, VertexList* > m_Meshs;
-		std::unordered_map< std::string, Texture* > m_Textures;
+		std::unordered_map< std::string, Texture* >    m_Textures;
 	};
 }

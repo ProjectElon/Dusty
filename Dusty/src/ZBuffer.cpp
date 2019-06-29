@@ -15,7 +15,7 @@ namespace dusty
 		m_Buffer = nullptr;
 	}
 
-	bool ZBuffer::test(int x, int y, float depth)
+	bool ZBuffer::Test(int x, int y, float depth)
 	{
 		if (depth < GetDepth(x, y))
 		{

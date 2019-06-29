@@ -16,6 +16,13 @@ namespace dusty
 		{
 			delete mesh.second;
 		}
+
+		for (auto texture : m_Textures)
+		{
+			delete texture.second;
+		}
+
+		std::cout << "Resources Freed Successfully.\n";
 	}
 
 	VertexList* Loader::ReadObjFile(const std::string& path)
@@ -56,28 +63,17 @@ namespace dusty
 
 			if (mark == "v")
 			{
-				math::Vector3 p(
-					ToFloat(tokens[1]),
-					ToFloat(tokens[2]),
-					ToFloat(tokens[3])
-				);
+				math::Vector3 p(ToFloat(tokens[1]), ToFloat(tokens[2]), ToFloat(tokens[3]));
 				positions.push_back(p);
 			}
 			else if (mark == "vt")
 			{
-				math::Vector2 t(
-					ToFloat(tokens[1]),
-					ToFloat(tokens[2])
-				);
+				math::Vector2 t(ToFloat(tokens[1]), ToFloat(tokens[2]));
 				texCoords.push_back(t);
 			}
 			else if (mark == "vn")
 			{
-				math::Vector3 n(
-					ToFloat(tokens[1]),
-					ToFloat(tokens[2]),
-					ToFloat(tokens[3])
-				);
+				math::Vector3 n(ToFloat(tokens[1]), ToFloat(tokens[2]), ToFloat(tokens[3]));
 				normals.push_back(n);
 			}
 			else if (mark == "f")
