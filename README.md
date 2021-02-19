@@ -13,4 +13,4 @@
  - Depth Testing (Z Buffer).
  - Dynamic Lighting (Phong Lighting Model)
  
- ![PROJECT IMAGE](https://github.com/ProjectElon/Vision/blob/master/ScreenShots/00.PNG)
+ ![PROJECT IMAGE](https://github.com/ProjectElon/Dusty/blob/master/images/img0.PNG)
